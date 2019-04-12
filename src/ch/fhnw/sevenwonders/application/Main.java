@@ -1,20 +1,33 @@
 package ch.fhnw.sevenwonders.application;
 	
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import ch.fhnw.sevenwonders.model.Game;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+
 
 
 public class Main extends Application {
+	private ServerView view;
+	private Game game;
+	
 	@Override
 	public void start(Stage primaryStage) {
-		try {
-			BorderPane root = new BorderPane();
-			Scene scene = new Scene(root,400,400);
-			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			primaryStage.setScene(scene);
-			primaryStage.show();
+		 // Registrieren des Loggers
+        TextAreaHandler infoLogger = new TextAreaHandler();
+        infoLogger.setLevel(Level.INFO);
+        Logger defaultLogger = Logger.getLogger("");
+        defaultLogger.addHandler(infoLogger);
+        
+        try {	        
+        	game = new Game();
+        	game.setDaemon(true);
+        	game.start();
+        	
+			view = new ServerView(primaryStage, infoLogger.getTextArea());
+			view.start();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
