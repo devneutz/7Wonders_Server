@@ -2,10 +2,8 @@ package ch.fhnw.sevenwonders.model;
 
 import java.util.ArrayList;
 
-import ch.fhnw.sevenwonders.enums.ResourceType;
-import ch.fhnw.sevenwonders.interfaces.IBoard;
-import ch.fhnw.sevenwonders.interfaces.ILobby;
-import ch.fhnw.sevenwonders.interfaces.IPlayer;
+import ch.fhnw.sevenwonders.enums.*;
+import ch.fhnw.sevenwonders.interfaces.*;
 
 public class Player implements IPlayer {
 
@@ -85,6 +83,12 @@ public class Player implements IPlayer {
 	public int compareTo(IPlayer player) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean getIsAuthenticated() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

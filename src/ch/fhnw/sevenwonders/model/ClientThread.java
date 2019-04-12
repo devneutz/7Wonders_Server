@@ -41,7 +41,7 @@ public class ClientThread extends Thread {
 	
 	private void handlingIncomingMessage(Message inMessage) {
 		if (inMessage instanceof ClientStartupMessage) {
-			logger.log(Level.INFO, "Message received [Client " + clientId + "] - ClientStartupMessage -> " + inMessage.message);
+			logger.log(Level.INFO, "Message received [Client " + clientId + "] - ClientStartupMessage");
 			// TODO Spieler anhand der einkommenden Nachricht authentifizieren etc.
 			return;
 		}
