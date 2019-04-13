@@ -26,6 +26,26 @@ public class Card implements ICard {
 	private boolean usedForPyramid;
 	private String imageName;
 	
+	public Card (String name,
+				 Age age,
+				 CardType cardType,
+				 int usedStartingFrom,
+				 ValueCalculationType valueCalculationType,
+				 ArrayList<ResourceType> value,
+				 ArrayList<ResourceType> cost,
+				 boolean usedForPyramid,
+				 String imageName) {
+		this.name = name;
+		this.age = age;
+		this.cardType = cardType;
+		this.usedStartingFrom = usedStartingFrom;
+		this.valueCalculationType = valueCalculationType;
+		this.value = value;
+		this.cost = cost;
+		this.usedForPyramid = usedForPyramid;
+		this.imageName = imageName;
+	}
+	
 	public Age getAge() {
 		return age;
 	}
@@ -47,11 +67,12 @@ public class Card implements ICard {
 	}
 	
 	public boolean isPlayable(ArrayList<ResourceType> availableResources) {
+		ArrayList<ResourceType> tempResources = availableResources;
 		boolean result = true;
 		for (int i = 0; i <= cost.size(); i++) {
-			for (int j = 0; j <= availableResources.size(); j++) {
-				if (availableResources.get(j).equals(cost.get(i))) {
-					availableResources.remove(j);
+			for (int j = 0; j <= tempResources.size(); j++) {
+				if (tempResources.get(j).equals(cost.get(i))) {
+					tempResources.remove(j);
 					result = true;
 					break;
 				}
