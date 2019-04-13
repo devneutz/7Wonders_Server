@@ -38,15 +38,15 @@ public class Player implements IPlayer {
 	}
 
 	@Override
-	public Boolean isPasswordValid() {
+	public boolean isPasswordValid() {
 		// TODO Auto-generated method stub
-		return null;
+		return true;
 	}
 
 	@Override
-	public Boolean getCardPlayed() {
+	public boolean getCardPlayed() {
 		// TODO Auto-generated method stub
-		return null;
+		return true;
 	}
 
 	@Override
