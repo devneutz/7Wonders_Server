@@ -46,10 +46,24 @@ public class Card implements ICard {
 		return value;
 	}
 	
-	public boolean isPlayable(ArrayList<ResourceType> cost) {
-		ArrayList<ResourceType> actResources;
-		
-		return true;			
+	public boolean isPlayable(ArrayList<ResourceType> availableResources) {
+		boolean result = true;
+		for (int i = 0; i <= cost.size(); i++) {
+			for (int j = 0; j <= availableResources.size(); j++) {
+				if (availableResources.get(j).equals(cost.get(i))) {
+					availableResources.remove(j);
+					result = true;
+					break;
+				}
+				else {
+					result = false;
+				}
+				
+			}
+			
+		}
+			
+		return result;			
 	}
 	
 	public ValueCalculationType getValueCalculationType() {
