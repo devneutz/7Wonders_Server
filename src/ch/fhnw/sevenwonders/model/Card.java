@@ -67,7 +67,8 @@ public class Card implements ICard {
 	}
 	
 	public boolean isPlayable(ArrayList<ResourceType> availableResources) {
-		ArrayList<ResourceType> tempResources = availableResources;
+		ArrayList<ResourceType> tempResources = new ArrayList<ResourceType>(availableResources.size());
+		for (ResourceType rt : availableResources) tempResources.add(rt);
 		boolean result = true;
 		for (int i = 0; i <= cost.size(); i++) {
 			for (int j = 0; j <= tempResources.size(); j++) {
