@@ -70,8 +70,8 @@ public class Card implements ICard {
 		ArrayList<ResourceType> tempResources = new ArrayList<ResourceType>(availableResources.size());
 		for (ResourceType rt : availableResources) tempResources.add(rt);
 		boolean result = true;
-		for (int i = 0; i <= cost.size(); i++) {
-			for (int j = 0; j <= tempResources.size(); j++) {
+		for (int i = 0; i < cost.size(); i++) {
+			for (int j = 0; j < tempResources.size(); j++) {
 				if (tempResources.get(j).equals(cost.get(i))) {
 					tempResources.remove(j);
 					result = true;
