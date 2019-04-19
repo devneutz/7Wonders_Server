@@ -8,13 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ch.fhnw.sevenwonders.helper.DbHelper;
 import ch.fhnw.sevenwonders.helper.InitHelper;
 import ch.fhnw.sevenwonders.interfaces.ICard;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
 
 public class Game extends Thread{
-
-private final Logger logger = Logger.getLogger("");
+	private final Logger logger = Logger.getLogger("");
 	private ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	private ArrayList<ILobby> lobbies = new ArrayList<ILobby>();
 	private static int clientId = 1;
@@ -24,6 +24,7 @@ private final Logger logger = Logger.getLogger("");
 	public Game() {
 		super("ServerSocket");
 		listOfAllCards = InitHelper.initAllCards();
+		DbHelper.InitDatabase();
 	}
 
 	@Override

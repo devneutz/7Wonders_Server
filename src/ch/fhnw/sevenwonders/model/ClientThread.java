@@ -1,14 +1,21 @@
 package ch.fhnw.sevenwonders.model;
 
+import java.io.EOFException;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ch.fhnw.sevenwonders.enums.StatusCode;
+import ch.fhnw.sevenwonders.interfaces.ILobby;
 import ch.fhnw.sevenwonders.interfaces.IPlayer;
 import ch.fhnw.sevenwonders.messages.ClientStartupMessage;
 import ch.fhnw.sevenwonders.messages.Message;
+import ch.fhnw.sevenwonders.messages.ServerStartupMessage;
+import ch.fhnw.sevenwonders.models.Player;
 
 public class ClientThread extends Thread {
 	private IPlayer player;
@@ -27,22 +34,32 @@ public class ClientThread extends Thread {
 	
 	@Override
 	public void run() {
-		try (ObjectInputStream in = new ObjectInputStream(socket.getInputStream());) {
+		try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(socket.getInputStream());) {
 			while (true) {
 				Object inObject = in.readObject(); 
 				if(inObject != null) {
-					handlingIncomingMessage((Message)inObject);
+					handlingIncomingMessage((Message)inObject, out);
 				}
 			}
+		}
+		catch(EOFException inEOFEx) {
+					
 		}catch(Exception inEx) {
 			logger.log(Level.SEVERE, "Error handling Message  [Client " + clientId + "]", inEx);
 		}
 	}
 	
-	private void handlingIncomingMessage(Message inMessage) {
+	private void handlingIncomingMessage(Message inMessage, ObjectOutputStream outputStream) throws IOException, InterruptedException{
 		if (inMessage instanceof ClientStartupMessage) {
 			logger.log(Level.INFO, "Message received [Client " + clientId + "] - ClientStartupMessage");
 			// TODO Spieler anhand der einkommenden Nachricht authentifizieren etc.
+			ServerStartupMessage tmpMessage = new ServerStartupMessage(((ClientStartupMessage)inMessage).getActionType());
+			tmpMessage.setPlayer(new Player());
+			tmpMessage.setLobbies(new ArrayList<ILobby>());
+			tmpMessage.setStatusCode(StatusCode.Success);
+			outputStream.writeObject(tmpMessage);
+			outputStream.flush();
 			return;
 		}
 	}
