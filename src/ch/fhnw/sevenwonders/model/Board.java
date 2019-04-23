@@ -18,7 +18,18 @@ public class Board implements IBoard {
 	private ArrayList<ResourceType> stepTwoValue;
 	private ArrayList<ResourceType> stepTwoCost;
 	private String imageName;
-
+	
+	public Board (String imageName,
+			ArrayList<ResourceType> stepOneValue,
+			ArrayList<ResourceType> stepOneCost,
+			ArrayList<ResourceType> stepTwoValue,
+			ArrayList<ResourceType> stepTwoCost) {
+		this.imageName = imageName;
+		this.stepOneValue = stepOneValue;
+		this.stepOneCost = stepOneCost;
+		this.stepTwoValue = stepTwoValue;
+		this.stepTwoCost = stepTwoCost;		
+	}
 	@Override
 	public Boolean canBuild(int inStep, ArrayList<ResourceType> inResources) {
 		ArrayList<ResourceType> tempResources = new ArrayList<ResourceType>(inResources.size());

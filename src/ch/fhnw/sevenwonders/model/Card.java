@@ -46,12 +46,20 @@ public class Card implements ICard {
 		this.imageName = imageName;
 	}
 	
+	public String getName() {
+		return name;
+	}
+	
 	public Age getAge() {
 		return age;
 	}
 	
 	public CardType getCardType() {
 		return cardType;
+	}
+	
+	public int getUsedStartingFrom() {
+		return usedStartingFrom;
 	}
 	
 	public boolean getUsedForPyramid() {
@@ -65,7 +73,7 @@ public class Card implements ICard {
 	public ArrayList<ResourceType> getValue() {
 		return value;
 	}
-	
+	// Überprüft, ob die Kosten der Karte (ArrayList cost) mit den zur Verfügung stehenden Resourcen gedeckt werden können.
 	public boolean isPlayable(ArrayList<ResourceType> availableResources) {
 		ArrayList<ResourceType> tempResources = new ArrayList<ResourceType>(availableResources.size());
 		for (ResourceType rt : availableResources) tempResources.add(rt);

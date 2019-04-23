@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 
 
 
-public class Main extends Application {
+public class ServerApplicationMain extends Application {
 	private ServerView view;
 	private Game game;
 	

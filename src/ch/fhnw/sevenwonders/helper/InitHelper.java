@@ -7,7 +7,7 @@ import ch.fhnw.sevenwonders.enums.CardType;
 import ch.fhnw.sevenwonders.enums.ResourceType;
 import ch.fhnw.sevenwonders.enums.ValueCalculationType;
 import ch.fhnw.sevenwonders.interfaces.ICard;
-import ch.fhnw.sevenwonders.model.Card;
+import ch.fhnw.sevenwonders.models.Card;
 
 /**
  * 
