@@ -27,7 +27,6 @@ public class ServerView {
         inLogArea.setWrapText(true);			
 		
 		Scene scene = new Scene(root,700,400);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 		stage.setScene(scene);
 		stage.show();
 	}
