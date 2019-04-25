@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import ch.fhnw.sevenwonders.helper.DbHelper;
 import ch.fhnw.sevenwonders.helper.InitHelper;
+import ch.fhnw.sevenwonders.interfaces.IBoard;
 import ch.fhnw.sevenwonders.interfaces.ICard;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
 
@@ -20,10 +21,12 @@ public class Game extends Thread{
 	private static int clientId = 1;
 	
 	private ArrayList<ICard> listOfAllCards = new ArrayList<ICard>();
+	private ArrayList<IBoard> listOfAllBoards = new ArrayList<IBoard>();
 	
 	public Game() {
 		super("ServerSocket");
 		listOfAllCards = InitHelper.initAllCards();
+		listOfAllBoards = InitHelper.initAllBoards();
 		DbHelper.InitDatabase();
 	}
 
@@ -47,5 +50,9 @@ public class Game extends Thread{
 
 	public ArrayList<ICard> getListOfCards(){
 		return this.listOfAllCards;
+	}
+	
+	public ArrayList<IBoard> getListOfBoards(){
+		return this.listOfAllBoards;
 	}
 }

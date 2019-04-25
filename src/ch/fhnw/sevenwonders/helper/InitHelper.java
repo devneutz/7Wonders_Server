@@ -1,12 +1,15 @@
 package ch.fhnw.sevenwonders.helper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import ch.fhnw.sevenwonders.enums.Age;
 import ch.fhnw.sevenwonders.enums.CardType;
 import ch.fhnw.sevenwonders.enums.ResourceType;
 import ch.fhnw.sevenwonders.enums.ValueCalculationType;
+import ch.fhnw.sevenwonders.interfaces.IBoard;
 import ch.fhnw.sevenwonders.interfaces.ICard;
+import ch.fhnw.sevenwonders.models.Board;
 import ch.fhnw.sevenwonders.models.Card;
 
 /**
@@ -15,7 +18,169 @@ import ch.fhnw.sevenwonders.models.Card;
  *
  */
 public class InitHelper {
-
+	
+	public static ArrayList<IBoard> initAllBoards(){
+		ArrayList<IBoard> tmpBoardList = new ArrayList<IBoard>();
+		
+		ArrayList<ResourceType> tmpResource = new ArrayList<ResourceType>();
+		ArrayList<ResourceType> tmpValueOne = new ArrayList<ResourceType>();
+		ArrayList<ResourceType> tmpCostOne = new ArrayList<ResourceType>();
+		ArrayList<ResourceType> tmpValueTwo = new ArrayList<ResourceType>();
+		ArrayList<ResourceType> tmpCostTwo = new ArrayList<ResourceType>();
+		ArrayList<ResourceType> tmpValueThree = new ArrayList<ResourceType>();
+		ArrayList<ResourceType> tmpCostThree = new ArrayList<ResourceType>();
+		
+		tmpResource.add(ResourceType.Papyrus);
+		tmpValueOne.add(ResourceType.VictoryPoint);
+		tmpValueOne.add(ResourceType.VictoryPoint);
+		tmpValueOne.add(ResourceType.VictoryPoint);
+		tmpCostOne.add(ResourceType.Stone);
+		tmpCostOne.add(ResourceType.Stone);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpValueTwo.add(ResourceType.Coin);
+		tmpCostTwo.add(ResourceType.Wood);
+		tmpCostTwo.add(ResourceType.Wood);
+		tmpValueThree.add(ResourceType.VictoryPoint);
+		tmpValueThree.add(ResourceType.VictoryPoint);
+		tmpValueThree.add(ResourceType.VictoryPoint);
+		tmpValueThree.add(ResourceType.VictoryPoint);
+		tmpValueThree.add(ResourceType.VictoryPoint);
+		tmpValueThree.add(ResourceType.VictoryPoint);
+		tmpValueThree.add(ResourceType.VictoryPoint);
+		tmpCostThree.add(ResourceType.Papyrus);
+		tmpCostThree.add(ResourceType.Papyrus);
+		
+		
+		tmpBoardList.add(new Board("Ephesos A", tmpResource, tmpValueOne, tmpCostOne, tmpValueTwo, tmpCostTwo, tmpValueThree, tmpCostThree, "Board_Ephesos_A"));
+				
+		tmpResource.clear();
+		tmpValueOne.clear();
+		tmpCostOne.clear();
+		tmpValueTwo.clear();
+		tmpCostTwo.clear();
+		tmpValueThree.clear();
+		tmpCostThree.clear();
+		
+		//----------------------------------------------------------
+		
+		tmpResource.add(ResourceType.Papyrus);
+		
+		tmpValueOne.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.Coin, 
+				ResourceType.Coin, ResourceType.Coin, ResourceType.Coin, ResourceType.Coin));
+		
+		tmpCostOne.addAll(Arrays.asList(ResourceType.Stone, ResourceType.Stone));
+		
+		tmpValueTwo.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint,
+				ResourceType.Coin, ResourceType.Coin, ResourceType.Coin, ResourceType.Coin));
+		
+		tmpCostTwo.addAll(Arrays.asList(ResourceType.Wood, ResourceType.Wood));
+		
+		tmpValueThree.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint,
+				ResourceType.VictoryPoint, ResourceType.Coin, ResourceType.Coin, ResourceType.Coin, ResourceType.Coin));
+		
+		tmpCostThree.addAll(Arrays.asList(ResourceType.Papyrus, ResourceType.Cloth, ResourceType.Glas));
+				
+		tmpBoardList.add(new Board("Ephesos B", tmpResource, tmpValueOne, tmpCostOne, tmpValueTwo, tmpCostTwo, tmpValueThree, tmpCostThree, "Board_Ephesos_B"));
+				
+		tmpResource.clear();
+		tmpValueOne.clear();
+		tmpCostOne.clear();
+		tmpValueTwo.clear();
+		tmpCostTwo.clear();
+		tmpValueThree.clear();
+		tmpCostThree.clear();
+		
+		//----------------------------------------------------------
+		
+		tmpResource.add(ResourceType.Stone);
+		
+		tmpValueOne.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint));
+		
+		tmpCostOne.addAll(Arrays.asList(ResourceType.Stone, ResourceType.Stone));
+		
+		tmpValueTwo.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint,
+				ResourceType.VictoryPoint, ResourceType.VictoryPoint));
+		
+		tmpCostTwo.addAll(Arrays.asList(ResourceType.Wood, ResourceType.Wood, ResourceType.Wood));
+		
+		tmpValueThree.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint,
+				ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint));
+		
+		tmpCostThree.addAll(Arrays.asList(ResourceType.Stone, ResourceType.Stone, ResourceType.Stone, ResourceType.Stone));
+				
+		tmpBoardList.add(new Board("Gizah A", tmpResource, tmpValueOne, tmpCostOne, tmpValueTwo, tmpCostTwo, tmpValueThree, tmpCostThree, "Board_Gizah_A"));
+				
+		tmpResource.clear();
+		tmpValueOne.clear();
+		tmpCostOne.clear();
+		tmpValueTwo.clear();
+		tmpCostTwo.clear();
+		tmpValueThree.clear();
+		tmpCostThree.clear();
+		
+		//----------------------------------------------------------
+		
+		tmpResource.add(ResourceType.Ore);
+		
+		tmpValueOne.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint));
+		
+		tmpCostOne.addAll(Arrays.asList(ResourceType.Wood, ResourceType.Wood));
+		
+		tmpValueTwo.addAll(Arrays.asList(ResourceType.MilitaryMight, ResourceType.MilitaryMight));
+		
+		tmpCostTwo.addAll(Arrays.asList(ResourceType.Clay, ResourceType.Clay, ResourceType.Clay));
+		
+		tmpValueThree.addAll(Arrays.asList(ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint,
+				ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint));
+		
+		tmpCostThree.addAll(Arrays.asList(ResourceType.Ore, ResourceType.Ore, ResourceType.Ore, ResourceType.Ore));
+				
+		tmpBoardList.add(new Board("Rhodos A", tmpResource, tmpValueOne, tmpCostOne, tmpValueTwo, tmpCostTwo, tmpValueThree, tmpCostThree, "Board_Rhodos_A"));
+				
+		tmpResource.clear();
+		tmpValueOne.clear();
+		tmpCostOne.clear();
+		tmpValueTwo.clear();
+		tmpCostTwo.clear();
+		tmpValueThree.clear();
+		tmpCostThree.clear();
+		
+		//----------------------------------------------------------
+		
+		tmpResource.add(ResourceType.Ore);
+		
+		tmpValueTwo.addAll(Arrays.asList(ResourceType.MilitaryMight, ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint,
+				ResourceType.Coin, ResourceType.Coin, ResourceType.Coin));
+		
+		tmpCostTwo.addAll(Arrays.asList(ResourceType.Stone, ResourceType.Stone, ResourceType.Stone));
+		
+		tmpValueThree.addAll(Arrays.asList(ResourceType.MilitaryMight, ResourceType.VictoryPoint, ResourceType.VictoryPoint, ResourceType.VictoryPoint,
+				ResourceType.VictoryPoint, ResourceType.Coin, ResourceType.Coin, ResourceType.Coin, ResourceType.Coin));
+		
+		tmpCostThree.addAll(Arrays.asList(ResourceType.Ore, ResourceType.Ore, ResourceType.Ore, ResourceType.Ore));
+				
+		tmpBoardList.add(new Board("Rhodos B", tmpResource, tmpValueOne, tmpCostOne, tmpValueTwo, tmpCostTwo, tmpValueThree, tmpCostThree, "Board_Rhodos_B"));
+				
+		tmpResource.clear();
+		tmpValueOne.clear();
+		tmpCostOne.clear();
+		tmpValueTwo.clear();
+		tmpCostTwo.clear();
+		tmpValueThree.clear();
+		tmpCostThree.clear();
+		
+		//----------------------------------------------------------
+		
+		return tmpBoardList;
+	}
+	
 	public static ArrayList<ICard> initAllCards(){
 		ArrayList<ICard> tmpCardList = new ArrayList<ICard>();
 		
