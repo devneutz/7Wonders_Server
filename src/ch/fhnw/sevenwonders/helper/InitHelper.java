@@ -699,6 +699,19 @@ public class InitHelper {
 		
 		//----------------------------------------------------------
 		
+		tmpCardList.add(new Card("Kontor Ost", Age.AgeI, null, 3, null, tmpValue, tmpCosts, false, "COM_Kontor Ost_3"));
+		tmpCardList.add(new Card("Kontor Ost", Age.AgeI, null, 7, null, tmpValue, tmpCosts, false, "COM_Kontor Ost_7"));
+		tmpCardList.add(new Card("Kontor West", Age.AgeI, null, 3, null, tmpValue, tmpCosts, false, "COM_Kontor West_3"));
+		tmpCardList.add(new Card("Kontor West", Age.AgeI, null, 7, null, tmpValue, tmpCosts, false, "COM_Kontor West_7"));
+		tmpCardList.add(new Card("Markt", Age.AgeI, null, 3, null, tmpValue, tmpCosts, false, "COM_Markt_3"));
+		tmpCardList.add(new Card("Markt", Age.AgeI, null, 6, null, tmpValue, tmpCosts, false, "COM_Markt_6"));
+		
+		tmpCardList.add(new Card("Basar", Age.AgeII, null, 4, null, tmpValue, tmpCosts, false, "COM_Basar_4"));
+		tmpCardList.add(new Card("Basar", Age.AgeII, null, 7, null, tmpValue, tmpCosts, false, "COM_Basar_7"));
+		tmpCardList.add(new Card("Weinberg", Age.AgeII, null, 3, null, tmpValue, tmpCosts, false, "COM_Weinberg_3"));
+		tmpCardList.add(new Card("Weinberg", Age.AgeII, null, 6, null, tmpValue, tmpCosts, false, "COM_Weinberg_6"));
+		
+		//----------------------------------------------------------
 		
 		return tmpCardList;
 	}
