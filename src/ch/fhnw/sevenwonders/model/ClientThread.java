@@ -13,8 +13,10 @@ import ch.fhnw.sevenwonders.enums.StatusCode;
 import ch.fhnw.sevenwonders.helper.DbHelper;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
 import ch.fhnw.sevenwonders.interfaces.IPlayer;
+import ch.fhnw.sevenwonders.messages.ClientLobbyMessage;
 import ch.fhnw.sevenwonders.messages.ClientStartupMessage;
 import ch.fhnw.sevenwonders.messages.Message;
+import ch.fhnw.sevenwonders.messages.ServerLobbyMessage;
 import ch.fhnw.sevenwonders.messages.ServerStartupMessage;
 import ch.fhnw.sevenwonders.models.Player;
 
@@ -149,6 +151,13 @@ public class ClientThread extends Thread {
 
 			}
 
+		}
+		
+		else if (inMessage instanceof ClientLobbyMessage) {
+			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(((ClientLobbyMessage)inMessage).getActionType());
+			tmpMessage.setStatusCode(StatusCode.Success);
+			outputStream.writeObject(tmpMessage);
+			outputStream.flush();
 		}
 
 	}
