@@ -9,12 +9,10 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ch.fhnw.sevenwonders.enums.StatusCode;
+import ch.fhnw.sevenwonders.enums.*;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
 import ch.fhnw.sevenwonders.interfaces.IPlayer;
-import ch.fhnw.sevenwonders.messages.ClientStartupMessage;
-import ch.fhnw.sevenwonders.messages.Message;
-import ch.fhnw.sevenwonders.messages.ServerStartupMessage;
+import ch.fhnw.sevenwonders.messages.*;
 import ch.fhnw.sevenwonders.models.Player;
 
 public class ClientThread extends Thread {
@@ -61,6 +59,29 @@ public class ClientThread extends Thread {
 			outputStream.writeObject(tmpMessage);
 			outputStream.flush();
 			return;
+		}
+		
+		if(inMessage instanceof ClientGameMessage)
+		{
+			logger.log(Level.INFO, "Client [" + clientId + "] hat gespielt");
+			// Is action valid?
+			ClientGameMessage tmpMessage = (ClientGameMessage)inMessage;
+			switch(tmpMessage.getAction()) {
+			case PlayCard:
+				return;
+			case BuildCard:
+				// What board does the player have? What stages have already been built? -> try to build the next stage
+				int tmpStageToBuild = tmpMessage.getPlayer().getBoard().getNextStageToBuild();
+				if(tmpMessage.getPlayer().getBoard().canBuild(tmpStageToBuild, tmpMessage.getPlayer().getResource(null))){
+					
+				}
+				
+				return;
+			case MonetizeCard:
+				return;
+				default:
+					return;
+			}
 		}
 	}
 }
