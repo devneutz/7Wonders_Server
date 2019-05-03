@@ -84,7 +84,6 @@ public class DbHelper {
 			String tmpCheckQuery = "SELECT nickname FROM player WHERE nickname = ?";
 			PreparedStatement tmpCheckStatement = tmpConnection.prepareStatement(tmpCheckQuery,
 					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			;
 			tmpCheckStatement.setString(1, inPlayer.getName());
 			ResultSet tmpResult = tmpCheckStatement.executeQuery();
 			if (tmpResult.next()) {
