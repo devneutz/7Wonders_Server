@@ -30,6 +30,7 @@ public class ClientThread extends Thread {
 	private final Logger logger = Logger.getLogger("");
 
 	private final int clientId;
+	private static volatile int guestCounter = 0;
 
 	/*
 	 * Konstruktur für den Clientthread
@@ -131,8 +132,10 @@ public class ClientThread extends Thread {
 
 			if (tmpMessage.getActionType() == StartupAction.LoginAsGuest) {
 				Player guestPlayer = new Player();
-				guestPlayer.setName("RANDOMNAME");
-
+				synchronized (this) {
+					guestCounter++;
+				}
+				guestPlayer.setName("Guest " + guestCounter);
 				tmpMessage.setPlayer(guestPlayer);
 
 				this.player = guestPlayer;
@@ -147,34 +150,35 @@ public class ClientThread extends Thread {
 			}
 
 		}
-		
+
 		else if (inMessage instanceof ClientLobbyMessage) {
-			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(((ClientLobbyMessage)inMessage).getActionType());
+			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(((ClientLobbyMessage) inMessage).getActionType());
 			tmpMessage.setStatusCode(StatusCode.Success);
 			outputStream.writeObject(tmpMessage);
 			outputStream.flush();
 		}
-		
-		else if(inMessage instanceof ClientGameMessage)
-		{
+
+		else if (inMessage instanceof ClientGameMessage) {
 			logger.log(Level.INFO, "Client [" + clientId + "] hat gespielt");
 			// Is action valid?
-			ClientGameMessage tmpMessage = (ClientGameMessage)inMessage;
-			switch(tmpMessage.getAction()) {
+			ClientGameMessage tmpMessage = (ClientGameMessage) inMessage;
+			switch (tmpMessage.getAction()) {
 			case PlayCard:
 				return;
 			case BuildCard:
-				// What board does the player have? What stages have already been built? -> try to build the next stage
+				// What board does the player have? What stages have already been built? -> try
+				// to build the next stage
 				int tmpStageToBuild = tmpMessage.getPlayer().getBoard().getNextStageToBuild();
-				if(tmpMessage.getPlayer().getBoard().canBuild(tmpStageToBuild, tmpMessage.getPlayer().getResource(null))){
-					
+				if (tmpMessage.getPlayer().getBoard().canBuild(tmpStageToBuild,
+						tmpMessage.getPlayer().getResource(null))) {
+
 				}
-				
+
 				return;
 			case MonetizeCard:
 				return;
-				default:
-					return;
+			default:
+				return;
 			}
 		}
 	}
