@@ -153,9 +153,17 @@ public class ClientThread extends Thread {
 
 		else if (inMessage instanceof ClientLobbyMessage) {
 			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(((ClientLobbyMessage) inMessage).getActionType());
+			IPlayer tmpPlayer = ((ClientLobbyMessage) inMessage).getPlayer();
+			ILobby tmpLobby = ((ClientLobbyMessage) inMessage).getLobby();
+			if(((ClientLobbyMessage) inMessage).getActionType() == LobbyAction.CreateLobby) {
+				tmpLobby.setLobbyMaster(tmpPlayer);
+			}
+
+			tmpMessage.setPlayer(tmpPlayer);
 			tmpMessage.setStatusCode(StatusCode.Success);
 			outputStream.writeObject(tmpMessage);
 			outputStream.flush();
+			return;
 		}
 
 		else if (inMessage instanceof ClientGameMessage) {
