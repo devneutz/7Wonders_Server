@@ -1,5 +1,6 @@
 package ch.fhnw.sevenwonders.model;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import ch.fhnw.sevenwonders.helper.InitHelper;
 import ch.fhnw.sevenwonders.interfaces.IBoard;
 import ch.fhnw.sevenwonders.interfaces.ICard;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
+import ch.fhnw.sevenwonders.messages.Message;
 
 public class Game extends Thread{
 	private final Logger logger = Logger.getLogger("");
@@ -37,7 +39,7 @@ public class Game extends Thread{
 			ExecutorService threadPool = Executors.newFixedThreadPool(20);
 			while (true) {
 				Socket socket = listener.accept();
-				ClientThread clientHandlingThread = new ClientThread(socket, clientId);
+				ClientThread clientHandlingThread = new ClientThread(socket, clientId, this);
 				clientId++;
 				clientHandlingThread.setDaemon(true);
 				clients.add(clientHandlingThread);
@@ -54,5 +56,17 @@ public class Game extends Thread{
 	
 	public ArrayList<IBoard> getListOfBoards(){
 		return this.listOfAllBoards;
+	}
+	
+	public void broadcastMessage(Message inMessage) {
+		logger.log(Level.INFO, "BROADCASTING MESSAGE");
+		for(ClientThread ct : clients) {
+			try {
+				ct.sendMessage(inMessage);
+			}
+			catch(IOException inEx) {
+				logger.log(Level.WARNING, "Broadcasting message failed", inEx);
+			}
+		}
 	}
 }
