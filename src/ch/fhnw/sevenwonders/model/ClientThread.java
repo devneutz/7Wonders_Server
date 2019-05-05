@@ -221,7 +221,7 @@ public class ClientThread extends Thread {
 				// to build the next stage
 				int tmpStageToBuild = tmpMessage.getPlayer().getBoard().getNextStageToBuild();
 				if (tmpMessage.getPlayer().getBoard().canBuild(tmpStageToBuild,
-						tmpMessage.getPlayer().getResource(null)))
+						tmpMessage.getPlayer().getPlayerResources()))
 				{
 
 				}
