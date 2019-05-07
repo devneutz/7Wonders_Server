@@ -17,7 +17,7 @@ import ch.fhnw.sevenwonders.models.Player;
 
 /**
  * 
- * @author Gabriel de Castilho, Joel Neutzner
+ * @author Gabriel de Castilho, Joel Neutzner, Matteo Farneti
  * 
  *         Diese Klasse stellt den ClientThread für den Server dar. Hier wird
  *         jede Client Anfrage separat in einem eigenen Thread verarbeitet.
@@ -44,36 +44,29 @@ public class ClientThread extends Thread {
 		this.socket = inSocket;
 		this.clientId = inClientId;
 		this.game = inGame;
-		try
-		{
+		try {
 			this.opponents = new ArrayList<IPlayer>();
 			this.out = new ObjectOutputStream(socket.getOutputStream());
 			this.in = new ObjectInputStream(socket.getInputStream());
 
 			logger.log(Level.INFO, "New client joined server [Client " + clientId + "]");
-		} catch (Exception inEx)
-		{
+		} catch (Exception inEx) {
 			logger.log(Level.SEVERE, "Error connecting client [" + clientId + "]");
 		}
 	}
 
 	@Override
 	public void run() {
-		try
-		{
-			while (!socket.isClosed())
-			{
+		try {
+			while (!socket.isClosed()) {
 				Object inObject = in.readObject();
-				if (inObject != null)
-				{
+				if (inObject != null) {
 					handlingIncomingMessage((Message) inObject);
 				}
 			}
-		} catch (EOFException inEOFEx)
-		{
+		} catch (EOFException inEOFEx) {
 
-		} catch (Exception inEx)
-		{
+		} catch (Exception inEx) {
 			logger.log(Level.SEVERE, "Error handling Message  [Client " + clientId + "]", inEx);
 		}
 	}
@@ -83,21 +76,17 @@ public class ClientThread extends Thread {
 	 * der StartupAction wird entschieden wie mit der Message umgegangen wird.
 	 */
 	private void handlingIncomingMessage(Message inMessage) throws IOException, InterruptedException {
-		if (inMessage instanceof ClientStartupMessage)
-		{
+		if (inMessage instanceof ClientStartupMessage) {
 			logger.log(Level.INFO, "Message received [Client " + clientId + "] - ClientStartupMessage");
 			ServerStartupMessage tmpMessage = new ServerStartupMessage(
 					((ClientStartupMessage) inMessage).getActionType());
 			IPlayer tmpPlayer = ((ClientStartupMessage) inMessage).getPlayer();
 
-			if (tmpMessage.getActionType() == StartupAction.Login)
-			{
+			if (tmpMessage.getActionType() == StartupAction.Login) {
 
-				if (DbHelper.doesPlayerExist(tmpPlayer))
-				{
+				if (DbHelper.doesPlayerExist(tmpPlayer)) {
 
-					if (DbHelper.isPasswordValid(tmpPlayer))
-					{
+					if (DbHelper.isPasswordValid(tmpPlayer)) {
 						tmpMessage.setPlayer(this.player);
 						tmpMessage.setLobbies(new ArrayList<ILobby>());
 						tmpMessage.setStatusCode(StatusCode.Success);
@@ -106,8 +95,7 @@ public class ClientThread extends Thread {
 						out.writeObject(tmpMessage);
 						out.flush();
 						return;
-					} else
-					{
+					} else {
 						tmpMessage.setStatusCode(StatusCode.LoginFailed);
 						logger.log(Level.WARNING,
 								"Player typed wrong password [Client " + clientId + "] - ClientStartupMessage");
@@ -116,29 +104,25 @@ public class ClientThread extends Thread {
 						return;
 					}
 
-				} else
-				{
+				} else {
 					tmpMessage.setStatusCode(StatusCode.LoginFailed);
 					logger.log(Level.WARNING,
 							"Player doesn't exists in db [Client " + clientId + "] - ClientStartupMessage");
 					out.writeObject(tmpMessage);
 					out.flush();
 					return;
-				}				
+				}
 			}
 
-			if (tmpMessage.getActionType() == StartupAction.Register)
-			{
-				if (DbHelper.doesPlayerExist(tmpPlayer))
-				{
+			if (tmpMessage.getActionType() == StartupAction.Register) {
+				if (DbHelper.doesPlayerExist(tmpPlayer)) {
 					tmpMessage.setStatusCode(StatusCode.RegistrationFailed);
 					logger.log(Level.WARNING,
 							"Player already exists in db [Client " + clientId + "] - ClientStartupMessage");
 					out.writeObject(tmpMessage);
 					out.flush();
 					return;
-				} else
-				{
+				} else {
 					DbHelper.addPlayer(tmpPlayer);
 					tmpMessage.setPlayer(this.player);
 					tmpMessage.setLobbies(new ArrayList<ILobby>());
@@ -149,11 +133,9 @@ public class ClientThread extends Thread {
 					out.flush();
 					return;
 				}
-			} else if (tmpMessage.getActionType() == StartupAction.LoginAsGuest)
-			{
+			} else if (tmpMessage.getActionType() == StartupAction.LoginAsGuest) {
 				Player guestPlayer = new Player();
-				synchronized (this)
-				{
+				synchronized (this) {
 					guestCounter++;
 				}
 				guestPlayer.setName("Guest " + guestCounter);
@@ -168,18 +150,14 @@ public class ClientThread extends Thread {
 				out.flush();
 				return;
 			}
-		} else if (inMessage instanceof ClientLobbyMessage)
-		{
+		} else if (inMessage instanceof ClientLobbyMessage) {
 			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(((ClientLobbyMessage) inMessage).getActionType());
-			switch (tmpMessage.getAction())
-			{
-			case CreateLobby:
-			{
+			switch (tmpMessage.getAction()) {
+			case CreateLobby: {
 				IPlayer tmpPlayer = ((ClientLobbyMessage) inMessage).getPlayer();
 				ILobby tmpLobby = ((ClientLobbyMessage) inMessage).getLobby();
 				tmpPlayer.setLobby(tmpLobby);
-				if (((ClientLobbyMessage) inMessage).getActionType() == LobbyAction.CreateLobby)
-				{
+				if (((ClientLobbyMessage) inMessage).getActionType() == LobbyAction.CreateLobby) {
 					tmpLobby.setLobbyMaster(tmpPlayer);
 				}
 
@@ -194,8 +172,7 @@ public class ClientThread extends Thread {
 				game.broadcastMessage(tmpBroadcast);
 				break;
 			}
-			case DeleteLobby:
-			{
+			case DeleteLobby: {
 				// Zusätzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
 				// anderen Spieler über die Löschung der Lobby Bescheid wissen.
 				ILobby tmpLobby = ((ClientLobbyMessage) inMessage).getLobby();
@@ -207,28 +184,62 @@ public class ClientThread extends Thread {
 			default:
 				break;
 			}
-		} else if (inMessage instanceof ClientGameMessage)
-		{
+		} else if (inMessage instanceof ClientGameMessage) {
 			logger.log(Level.INFO, "Client [" + clientId + "] hat gespielt");
 			// Is action valid?
 			ClientGameMessage tmpMessage = (ClientGameMessage) inMessage;
-			switch (tmpMessage.getAction())
-			{
-			case PlayCard:
-				return;
+			switch (tmpMessage.getAction()) {
+			case PlayCard: {
+				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
+				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
+
+				if (((ClientGameMessage) inMessage).getAction() == GameAction.PlayCard) {
+					tmpPlayer.playCard(tmpCard, tmpPlayer);
+				}
+				tmpMessage.setPlayer(tmpPlayer);
+				tmpMessage.setCard(tmpCard);
+				out.writeObject(tmpMessage);
+				out.flush();
+				break;
+			}
+
 			case BuildCard:
 				// What board does the player have? What stages have already been built? -> try
 				// to build the next stage
 				int tmpStageToBuild = tmpMessage.getPlayer().getBoard().getNextStageToBuild();
 				if (tmpMessage.getPlayer().getBoard().canBuild(tmpStageToBuild,
-						tmpMessage.getPlayer().getPlayerResources()))
-				{
+						tmpMessage.getPlayer().getPlayerResources())) {
+					IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
+					ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
+					IBoard tmpBoard = ((ClientGameMessage) inMessage).getBoard();
+
+					if (((ClientGameMessage) inMessage).getAction() == GameAction.BuildCard) {
+						tmpPlayer.useCardForBuilding(tmpCard, tmpPlayer, tmpBoard);
+					}
+					tmpMessage.setPlayer(tmpPlayer);
+					tmpMessage.setCard(tmpCard);
+					tmpMessage.setBoard(tmpBoard);
+					out.writeObject(tmpMessage);
+					out.flush();
+					break;
 
 				}
 
 				return;
-			case MonetizeCard:
-				return;
+			case MonetizeCard: {
+				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
+				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
+
+				if (((ClientGameMessage) inMessage).getAction() == GameAction.MonetizeCard) {
+					tmpPlayer.monetizeCard(tmpCard, tmpPlayer);
+				}
+
+				tmpMessage.setPlayer(tmpPlayer);
+				tmpMessage.setCard(tmpCard);
+				out.writeObject(tmpMessage);
+				out.flush();
+				break;
+			}
 			default:
 				return;
 			}

@@ -14,7 +14,7 @@ import ch.fhnw.sevenwonders.models.Card;
 
 /**
  * 
- * @author Matteo
+ * @author Matteo Farneti
  *
  */
 public class InitHelper {
