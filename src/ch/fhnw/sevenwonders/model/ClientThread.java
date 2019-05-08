@@ -194,7 +194,7 @@ public class ClientThread extends Thread {
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
 
 				if (((ClientGameMessage) inMessage).getAction() == GameAction.PlayCard) {
-					tmpPlayer.playCard(tmpCard, tmpPlayer);
+					tmpPlayer.playCard(tmpCard);
 				}
 				tmpMessage.setPlayer(tmpPlayer);
 				tmpMessage.setCard(tmpCard);
@@ -214,7 +214,7 @@ public class ClientThread extends Thread {
 					IBoard tmpBoard = ((ClientGameMessage) inMessage).getBoard();
 
 					if (((ClientGameMessage) inMessage).getAction() == GameAction.BuildCard) {
-						tmpPlayer.useCardForBuilding(tmpCard, tmpPlayer, tmpBoard);
+						tmpPlayer.useCardForBuilding(tmpCard);
 					}
 					tmpMessage.setPlayer(tmpPlayer);
 					tmpMessage.setCard(tmpCard);
@@ -229,13 +229,11 @@ public class ClientThread extends Thread {
 			case MonetizeCard: {
 				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
-
-				if (((ClientGameMessage) inMessage).getAction() == GameAction.MonetizeCard) {
-					tmpPlayer.monetizeCard(tmpCard, tmpPlayer);
-				}
+				
+				// Münze die Karte um
+				tmpPlayer.monetizeCard(tmpCard);
 
 				tmpMessage.setPlayer(tmpPlayer);
-				tmpMessage.setCard(tmpCard);
 				out.writeObject(tmpMessage);
 				out.flush();
 				break;
