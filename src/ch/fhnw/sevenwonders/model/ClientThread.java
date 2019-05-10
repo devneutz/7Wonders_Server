@@ -88,7 +88,7 @@ public class ClientThread extends Thread {
 
 					if (DbHelper.isPasswordValid(tmpPlayer)) {
 						tmpMessage.setPlayer(this.player);
-						tmpMessage.setLobbies(new ArrayList<ILobby>());
+						tmpMessage.setLobbies(game.getLobbies());
 						tmpMessage.setStatusCode(StatusCode.Success);
 						logger.log(Level.INFO,
 								"Player logged in successfully [Client " + clientId + "] - ClientStartupMessage");
@@ -125,7 +125,7 @@ public class ClientThread extends Thread {
 				} else {
 					DbHelper.addPlayer(tmpPlayer);
 					tmpMessage.setPlayer(this.player);
-					tmpMessage.setLobbies(new ArrayList<ILobby>());
+					tmpMessage.setLobbies(game.getLobbies());
 					tmpMessage.setStatusCode(StatusCode.Success);
 					logger.log(Level.INFO,
 							"Player logged in successfully [Client " + clientId + "] - ClientStartupMessage");
@@ -143,7 +143,7 @@ public class ClientThread extends Thread {
 
 				this.player = guestPlayer;
 
-				tmpMessage.setLobbies(new ArrayList<ILobby>());
+				tmpMessage.setLobbies(game.getLobbies());
 				tmpMessage.setStatusCode(StatusCode.Success);
 				logger.log(Level.INFO, "Guest logged in successfully [Client " + clientId + "] - ClientStartupMessage");
 				out.writeObject(tmpMessage);
@@ -157,10 +157,9 @@ public class ClientThread extends Thread {
 				IPlayer tmpPlayer = ((ClientLobbyMessage) inMessage).getPlayer();
 				ILobby tmpLobby = ((ClientLobbyMessage) inMessage).getLobby();
 				tmpPlayer.setLobby(tmpLobby);
-				if (((ClientLobbyMessage) inMessage).getActionType() == LobbyAction.CreateLobby) {
-					tmpLobby.setLobbyMaster(tmpPlayer);
-				}
+				tmpLobby.setLobbyMaster(tmpPlayer);
 
+				this.game.addLobby(tmpLobby);
 				tmpMessage.setPlayer(tmpPlayer);
 				tmpMessage.setStatusCode(StatusCode.Success);
 				out.writeObject(tmpMessage);

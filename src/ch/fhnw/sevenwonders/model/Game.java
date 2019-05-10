@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -19,7 +21,7 @@ import ch.fhnw.sevenwonders.messages.Message;
 public class Game extends Thread{
 	private final Logger logger = Logger.getLogger("");
 	private ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	private ArrayList<ILobby> lobbies = new ArrayList<ILobby>();
+	private List<ILobby> lobbies;
 	private static int clientId = 1;
 	
 	private ArrayList<ICard> listOfAllCards = new ArrayList<ICard>();
@@ -29,6 +31,7 @@ public class Game extends Thread{
 		super("ServerSocket");
 		listOfAllCards = InitHelper.initAllCards();
 		listOfAllBoards = InitHelper.initAllBoards();
+		this.lobbies = Collections.synchronizedList(new ArrayList<ILobby>());
 		DbHelper.InitDatabase();
 	}
 
@@ -68,5 +71,21 @@ public class Game extends Thread{
 				logger.log(Level.WARNING, "Broadcasting message failed", inEx);
 			}
 		}
+	}
+	
+	public void addLobby(ILobby inLobby) {
+		synchronized(this.lobbies){
+			this.lobbies.add(inLobby);
+		}
+	}
+	
+	public void removeLobby(ILobby inLobby) {
+		synchronized(this.lobbies) {
+			this.lobbies.remove(inLobby);
+		}
+	}
+	
+	public ArrayList<ILobby> getLobbies(){
+		return new ArrayList<ILobby>(this.lobbies);
 	}
 }
