@@ -175,10 +175,19 @@ public class ClientThread extends Thread {
 				// Zusätzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
 				// anderen Spieler über die Löschung der Lobby Bescheid wissen.
 				ILobby tmpLobby = ((ClientLobbyMessage) inMessage).getLobby();
-				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
-				tmpBroadcast.setLobby(tmpLobby);
-				game.broadcastMessage(tmpBroadcast);
-				break;
+				IPlayer tmpPlayer = ((ClientLobbyMessage) inMessage).getPlayer();
+				if (tmpLobby.getLobbyMaster().getName().equalsIgnoreCase(tmpPlayer.getName())) {
+					this.game.removeLobby(tmpLobby);
+					this.player.setLobby(null);
+					tmpMessage.setStatusCode(StatusCode.Success);
+					tmpMessage.setPlayer(this.player);
+					out.writeObject(tmpMessage);
+					out.flush();
+					ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
+					tmpBroadcast.setLobby(tmpLobby);
+					game.broadcastMessage(tmpBroadcast);
+					break;
+				}
 			}
 			default:
 				break;
@@ -228,7 +237,7 @@ public class ClientThread extends Thread {
 			case MonetizeCard: {
 				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
-				
+
 				// Münze die Karte um
 				tmpPlayer.monetizeCard(tmpCard);
 
