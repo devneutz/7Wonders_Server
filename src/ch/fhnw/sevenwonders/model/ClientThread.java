@@ -19,7 +19,7 @@ import ch.fhnw.sevenwonders.models.Player;
  * 
  * @author Gabriel de Castilho, Joel Neutzner, Matteo Farneti
  * 
- *         Diese Klasse stellt den ClientThread für den Server dar. Hier wird
+ *         Diese Klasse stellt den ClientThread fï¿½r den Server dar. Hier wird
  *         jede Client Anfrage separat in einem eigenen Thread verarbeitet.
  *
  */
@@ -38,7 +38,7 @@ public class ClientThread extends Thread {
 	private ObjectInputStream in;
 
 	/*
-	 * Konstruktur für den Clientthread
+	 * Konstruktur fï¿½r den Clientthread
 	 */
 	public ClientThread(Socket inSocket, int inClientId, Game inGame) {
 		this.socket = inSocket;
@@ -87,6 +87,7 @@ public class ClientThread extends Thread {
 				if (DbHelper.doesPlayerExist(tmpPlayer)) {
 
 					if (DbHelper.isPasswordValid(tmpPlayer)) {
+						this.player = tmpPlayer;
 						tmpMessage.setPlayer(this.player);
 						tmpMessage.setLobbies(game.getLobbies());
 						tmpMessage.setStatusCode(StatusCode.Success);
@@ -124,6 +125,7 @@ public class ClientThread extends Thread {
 					return;
 				} else {
 					DbHelper.addPlayer(tmpPlayer);
+					this.player = tmpPlayer;
 					tmpMessage.setPlayer(this.player);
 					tmpMessage.setLobbies(game.getLobbies());
 					tmpMessage.setStatusCode(StatusCode.Success);
@@ -164,16 +166,16 @@ public class ClientThread extends Thread {
 				tmpMessage.setStatusCode(StatusCode.Success);
 				out.writeObject(tmpMessage);
 				out.flush();
-				// Zusätzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-				// anderen Spieler über die neue Lobby Bescheid wissen.
+				// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+				// anderen Spieler ï¿½ber die neue Lobby Bescheid wissen.
 				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyCreated);
 				tmpBroadcast.setLobby(tmpLobby);
 				game.broadcastMessage(tmpBroadcast);
 				break;
 			}
 			case DeleteLobby: {
-				// Zusätzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-				// anderen Spieler über die Löschung der Lobby Bescheid wissen.
+				// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+				// anderen Spieler ï¿½ber die Lï¿½schung der Lobby Bescheid wissen.
 				ILobby tmpLobby = ((ClientLobbyMessage) inMessage).getLobby();
 				IPlayer tmpPlayer = ((ClientLobbyMessage) inMessage).getPlayer();
 				if (tmpLobby.getLobbyMaster().getName().equalsIgnoreCase(tmpPlayer.getName())) {
@@ -237,8 +239,8 @@ public class ClientThread extends Thread {
 			case MonetizeCard: {
 				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
-
-				// Münze die Karte um
+				
+				// Muenze die Karte um
 				tmpPlayer.monetizeCard(tmpCard);
 
 				tmpMessage.setPlayer(tmpPlayer);
