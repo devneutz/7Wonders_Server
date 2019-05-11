@@ -17,6 +17,7 @@ import ch.fhnw.sevenwonders.helper.InitHelper;
 import ch.fhnw.sevenwonders.interfaces.IBoard;
 import ch.fhnw.sevenwonders.interfaces.ICard;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
+import ch.fhnw.sevenwonders.interfaces.IPlayer;
 import ch.fhnw.sevenwonders.messages.Message;
 
 public class Game extends Thread{
@@ -99,18 +100,27 @@ public class Game extends Thread{
 	
 	
 	public int countLobbyPlayers(ILobby lobby){
-		int count = 0;
+		return getPlayersForLobby(lobby).size();
+	}
+	
+	public ArrayList<IPlayer> getPlayersForLobby(ILobby inLobby){
+		ArrayList<IPlayer> tmpPlayers = new ArrayList<IPlayer>();
 		synchronized(this.clients) {
 			for(int x = 0; x < this.clients.size(); x++) {
 				if(clients.get(x).getPlayer().getLobby() != null) {
-					if(clients.get(x).getPlayer().getLobby().getLobbyName() == lobby.getLobbyName()) {
-						count++;
+					if(clients.get(x).getPlayer().getLobby().getLobbyName() == inLobby.getLobbyName()) {
+						tmpPlayers.add(clients.get(x).getPlayer());
 					}
 				
 				}
-			}
-	
+			}	
 		}
-		return count;
+		return tmpPlayers;
+	}
+	
+	public void removeClient(ClientThread inClient) {
+		synchronized(this.clients) {
+			this.clients.remove(inClient);
+		}
 	}
 }
