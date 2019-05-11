@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,7 +18,7 @@ import ch.fhnw.sevenwonders.models.Player;
 
 /**
  * 
- * @author Gabriel de Castilho, Joel Neutzner, Matteo Farneti
+ * @author Gabriel de Castilho, Joel Neutzner, Matteo Farneti, Ismael Liuzzi
  * 
  *         Diese Klasse stellt den ClientThread fï¿½r den Server dar. Hier wird
  *         jede Client Anfrage separat in einem eigenen Thread verarbeitet.
@@ -182,6 +183,62 @@ public class ClientThread extends Thread {
 				game.broadcastMessage(tmpBroadcast);
 				break;
 			}
+			
+			case JoinLobby: {
+				ILobby tmpLobby = ((ClientLobbyMessage) inMessage).getLobby();
+				IPlayer tmpPlayer = ((ClientLobbyMessage) inMessage).getPlayer();
+				boolean lobbyFound = false;
+				
+				synchronized(game.getLobbies()) {
+					Iterator<ILobby> iter = game.getLobbies().iterator();
+					while (iter.hasNext()) {
+						ILobby L = iter.next();
+						if (L.getLobbyName().equals(tmpLobby.getLobbyName())) {
+						lobbyFound = true; 
+						break;
+						}
+					
+					}
+				}
+				
+				if (!lobbyFound) {
+					tmpMessage.setPlayer(tmpPlayer);
+					tmpMessage.setStatusCode(StatusCode.LobbyNotAvailable);
+					out.writeObject(tmpMessage);
+					out.flush(); 
+					return;
+					
+				}
+				if (tmpLobby.getNumPlayers() == this.game.countLobbyPlayers(tmpLobby)) {
+					tmpMessage.setPlayer(tmpPlayer);
+					tmpMessage.setStatusCode(StatusCode.LobbyMaxPlayerReached);
+					out.writeObject(tmpMessage);
+					out.flush();
+					
+								
+					
+				} else { 
+					
+					this.player.setLobby(tmpLobby);
+										
+					tmpMessage.setPlayer(this.player);
+					tmpMessage.setLobby(tmpLobby);
+					tmpMessage.setStatusCode(StatusCode.Success);
+					out.writeObject(tmpMessage);
+					out.flush();
+					// Zusï¿½tzlich zur Antwort an den Beitretende einen Broadcast absetzen, damit die
+					// andere Spieler über den neuen Spieler Bescheid wissen.
+					ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerJoined);
+					tmpBroadcast.setLobby(tmpLobby);
+					game.broadcastMessage(tmpBroadcast);
+					
+				}
+				
+				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerJoined);
+				tmpBroadcast.setLobby(tmpLobby);
+				game.broadcastMessage(tmpBroadcast);
+				break;
+			}
 			default:
 				break;
 			}
@@ -246,9 +303,19 @@ public class ClientThread extends Thread {
 	}
 
 	public void sendMessage(Message inMessage) throws IOException {
-		logger.log(Level.INFO, "sending message lobby created");
+		logger.log(Level.INFO, "sending message" + inMessage.getClass().getName());
 		out.writeObject(inMessage);
 		out.flush();
 	}
+
+	public IPlayer getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(IPlayer player) {
+		this.player = player;
+	}
+	
+	
 
 }

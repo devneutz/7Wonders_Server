@@ -88,4 +88,21 @@ public class Game extends Thread{
 	public ArrayList<ILobby> getLobbies(){
 		return new ArrayList<ILobby>(this.lobbies);
 	}
+	
+	
+	public int countLobbyPlayers(ILobby lobby){
+		int count = 0;
+		synchronized(this.clients) {
+			for(int x = 0; x < this.clients.size(); x++) {
+				if(clients.get(x).getPlayer().getLobby() != null) {
+					if(clients.get(x).getPlayer().getLobby().getLobbyName() == lobby.getLobbyName()) {
+						count++;
+					}
+				
+				}
+			}
+	
+		}
+		return count;
+	}
 }
