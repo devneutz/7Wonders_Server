@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,7 +82,14 @@ public class Game extends Thread{
 	
 	public void removeLobby(ILobby inLobby) {
 		synchronized(this.lobbies) {
-			this.lobbies.remove(inLobby);
+			Iterator<ILobby> iter = this.lobbies.iterator();
+			while(iter.hasNext()) {
+				ILobby L = iter.next();
+				if(L.getLobbyName().equals(inLobby.getLobbyName())) {
+					iter.remove();
+				}
+				
+			}
 		}
 	}
 	
