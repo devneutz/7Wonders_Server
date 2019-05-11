@@ -94,7 +94,7 @@ public class ClientThread extends Thread {
 		ServerStartupMessage tmpMessage = new ServerStartupMessage(inMessage.getActionType());
 		IPlayer tmpPlayer =  inMessage.getPlayer();
 
-		if (tmpMessage.getActionType() == StartupAction.Login) {
+		if (inMessage.getActionType() == StartupAction.Login) {
 
 			if (DbHelper.doesPlayerExist(tmpPlayer)) {
 
@@ -127,7 +127,7 @@ public class ClientThread extends Thread {
 			}
 		}
 
-		if (tmpMessage.getActionType() == StartupAction.Register) {
+		if (inMessage.getActionType() == StartupAction.Register) {
 			if (DbHelper.doesPlayerExist(tmpPlayer)) {
 				tmpMessage.setStatusCode(StatusCode.RegistrationFailed);
 				logger.log(Level.WARNING,
@@ -147,7 +147,7 @@ public class ClientThread extends Thread {
 				out.flush();
 				return;
 			}
-		} else if (tmpMessage.getActionType() == StartupAction.LoginAsGuest) {
+		} else if (inMessage.getActionType() == StartupAction.LoginAsGuest) {
 			Player guestPlayer = new Player();
 			synchronized (this) {
 				guestCounter++;
@@ -208,6 +208,25 @@ public class ClientThread extends Thread {
 				}
 				break;
 			}
+			case LeaveLobby: {
+				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.LeaveLobby);
+				// Zus�tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+				// anderen Spieler �ber die L�schung der Lobby Bescheid wissen.
+				ILobby tmpLobby = inMessage.getLobby();
+				IPlayer tmpPlayer = inMessage.getPlayer();
+				//tmpLobby.removePlayer(tmpPlayer);
+				this.player.setLobby(null);
+				tmpMessage.setStatusCode(StatusCode.Success);
+				tmpMessage.setPlayer(this.player);
+				out.writeObject(tmpMessage);
+				out.flush();
+				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LeaveLobby);
+				tmpBroadcast.setLobby(tmpLobby);
+				game.broadcastMessage(tmpBroadcast);
+				break;
+								
+				}
+				
 			
 			case JoinLobby: {
 				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.JoinLobby);				
