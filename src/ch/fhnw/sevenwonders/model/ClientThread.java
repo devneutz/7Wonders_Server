@@ -220,7 +220,7 @@ public class ClientThread extends Thread {
 				tmpMessage.setPlayer(this.player);
 				out.writeObject(tmpMessage);
 				out.flush();
-				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LeaveLobby);
+				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
 				tmpBroadcast.setLobby(tmpLobby);
 				game.broadcastMessage(tmpBroadcast);
 				break;
