@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +17,7 @@ import ch.fhnw.sevenwonders.helper.InitHelper;
 import ch.fhnw.sevenwonders.interfaces.IBoard;
 import ch.fhnw.sevenwonders.interfaces.ICard;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
+import ch.fhnw.sevenwonders.interfaces.IPlayer;
 import ch.fhnw.sevenwonders.messages.Message;
 
 public class Game extends Thread{
@@ -81,11 +83,44 @@ public class Game extends Thread{
 	
 	public void removeLobby(ILobby inLobby) {
 		synchronized(this.lobbies) {
-			this.lobbies.remove(inLobby);
+			Iterator<ILobby> iter = this.lobbies.iterator();
+			while(iter.hasNext()) {
+				ILobby L = iter.next();
+				if(L.getLobbyName().equals(inLobby.getLobbyName())) {
+					iter.remove();
+				}
+				
+			}
 		}
 	}
 	
 	public ArrayList<ILobby> getLobbies(){
 		return new ArrayList<ILobby>(this.lobbies);
+	}
+	
+	
+	public int countLobbyPlayers(ILobby lobby){
+		return getPlayersForLobby(lobby).size();
+	}
+	
+	public ArrayList<IPlayer> getPlayersForLobby(ILobby inLobby){
+		ArrayList<IPlayer> tmpPlayers = new ArrayList<IPlayer>();
+		synchronized(this.clients) {
+			for(int x = 0; x < this.clients.size(); x++) {
+				if(clients.get(x).getPlayer().getLobby() != null) {
+					if(clients.get(x).getPlayer().getLobby().getLobbyName() == inLobby.getLobbyName()) {
+						tmpPlayers.add(clients.get(x).getPlayer());
+					}
+				
+				}
+			}	
+		}
+		return tmpPlayers;
+	}
+	
+	public void removeClient(ClientThread inClient) {
+		synchronized(this.clients) {
+			this.clients.remove(inClient);
+		}
 	}
 }
