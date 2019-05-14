@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ch.fhnw.sevenwonders.enums.LobbyAction;
 import ch.fhnw.sevenwonders.helper.DbHelper;
 import ch.fhnw.sevenwonders.helper.InitHelper;
 import ch.fhnw.sevenwonders.interfaces.IBoard;
@@ -19,6 +20,7 @@ import ch.fhnw.sevenwonders.interfaces.ICard;
 import ch.fhnw.sevenwonders.interfaces.ILobby;
 import ch.fhnw.sevenwonders.interfaces.IPlayer;
 import ch.fhnw.sevenwonders.messages.Message;
+import ch.fhnw.sevenwonders.messages.ServerLobbyMessage;
 
 public class Game extends Thread{
 	private final Logger logger = Logger.getLogger("");
@@ -121,6 +123,13 @@ public class Game extends Thread{
 	public void removeClient(ClientThread inClient) {
 		synchronized(this.clients) {
 			this.clients.remove(inClient);
+		}
+		
+		if(inClient.getPlayer().getLobby() != null) {
+			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
+			tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
+			tmpBroadcast.setPlayer(inClient.getPlayer());
+			broadcastMessage(tmpBroadcast);
 		}
 	}
 }
