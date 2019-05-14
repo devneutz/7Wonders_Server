@@ -40,6 +40,7 @@ public class DbHelper {
 					+ "						NoOfThirdPlace int,"
 					+ "						NoOfSecondPlace int, " 
 					+ "						PRIMARY KEY(nickname) )");
+			DbConnectionPool.getInstance().returnConnection(tmpConnection);
 		} catch (SQLException inEx) {
 			logger.log(Level.SEVERE, "Error creating table [player]", inEx);
 		} finally {
@@ -61,8 +62,10 @@ public class DbHelper {
 			ResultSet tmpResult = tmpCheckStatement.executeQuery();
 			if (tmpResult.next()) {
 				String tmpPassword = tmpResult.getString("password");
+				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return inPlayer.getPassword().equalsIgnoreCase(tmpPassword);
 			} else {
+				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return false;
 			}
 		} catch (SQLException inEx) {
@@ -88,8 +91,10 @@ public class DbHelper {
 			ResultSet tmpResult = tmpCheckStatement.executeQuery();
 			if (tmpResult.next()) {
 				String tmpNickname = tmpResult.getString("nickname");
+				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return inPlayer.getName().equalsIgnoreCase(tmpNickname);
 			} else {
+				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return false;
 			}
 		} catch (SQLException inEx) {
@@ -120,6 +125,7 @@ public class DbHelper {
 			tmpCheckStatement.setInt(6, 0);
 
 			tmpCheckStatement.execute();
+			DbConnectionPool.getInstance().returnConnection(tmpConnection);
 
 		} catch (SQLException inEx) {
 			logger.log(Level.WARNING, "Error trying to add player to db!", inEx);
