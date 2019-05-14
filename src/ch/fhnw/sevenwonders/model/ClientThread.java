@@ -80,6 +80,7 @@ public class ClientThread extends Thread {
 	 * der StartupAction wird entschieden wie mit der Message umgegangen wird.
 	 */
 	private void handlingIncomingMessage(Message inMessage) throws IOException, InterruptedException {
+		out.reset();
 		if (inMessage instanceof ClientStartupMessage) {
 			handleStartupMessages((ClientStartupMessage)inMessage);
 		} else if (inMessage instanceof ClientLobbyMessage) {
