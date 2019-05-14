@@ -40,6 +40,7 @@ public class DbHelper {
 					+ "						NoOfThirdPlace int,"
 					+ "						NoOfSecondPlace int, " 
 					+ "						PRIMARY KEY(nickname) )");
+			tmpCreateTableStm.close();
 			DbConnectionPool.getInstance().returnConnection(tmpConnection);
 		} catch (SQLException inEx) {
 			logger.log(Level.SEVERE, "Error creating table [player]", inEx);
@@ -61,10 +62,13 @@ public class DbHelper {
 			tmpCheckStatement.setString(1, inPlayer.getName());
 			ResultSet tmpResult = tmpCheckStatement.executeQuery();
 			if (tmpResult.next()) {
+
+				tmpCheckStatement.close();
 				String tmpPassword = tmpResult.getString("password");
 				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return inPlayer.getPassword().equalsIgnoreCase(tmpPassword);
 			} else {
+				tmpCheckStatement.close();
 				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return false;
 			}
@@ -90,10 +94,14 @@ public class DbHelper {
 			tmpCheckStatement.setString(1, inPlayer.getName());
 			ResultSet tmpResult = tmpCheckStatement.executeQuery();
 			if (tmpResult.next()) {
+
+				tmpCheckStatement.close();
 				String tmpNickname = tmpResult.getString("nickname");
 				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return inPlayer.getName().equalsIgnoreCase(tmpNickname);
 			} else {
+
+				tmpCheckStatement.close();
 				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return false;
 			}
@@ -125,6 +133,8 @@ public class DbHelper {
 			tmpCheckStatement.setInt(6, 0);
 
 			tmpCheckStatement.execute();
+
+			tmpCheckStatement.close();
 			DbConnectionPool.getInstance().returnConnection(tmpConnection);
 
 		} catch (SQLException inEx) {
