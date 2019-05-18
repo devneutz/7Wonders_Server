@@ -106,15 +106,13 @@ public class ClientThread extends Thread {
 					tmpMessage.setStatusCode(StatusCode.Success);
 					logger.log(Level.INFO,
 							"Player logged in successfully [Client " + clientId + "] - ClientStartupMessage");
-					out.writeObject(tmpMessage);
-					out.flush();
+					sendMessage(tmpMessage);
 					return;
 				} else {
 					tmpMessage.setStatusCode(StatusCode.LoginFailed);
 					logger.log(Level.WARNING,
 							"Player typed wrong password [Client " + clientId + "] - ClientStartupMessage");
-					out.writeObject(tmpMessage);
-					out.flush();
+					sendMessage(tmpMessage);
 					return;
 				}
 
@@ -122,8 +120,7 @@ public class ClientThread extends Thread {
 				tmpMessage.setStatusCode(StatusCode.LoginFailed);
 				logger.log(Level.WARNING,
 						"Player doesn't exists in db [Client " + clientId + "] - ClientStartupMessage");
-				out.writeObject(tmpMessage);
-				out.flush();
+				sendMessage(tmpMessage);
 				return;
 			}
 		}
@@ -133,8 +130,7 @@ public class ClientThread extends Thread {
 				tmpMessage.setStatusCode(StatusCode.RegistrationFailed);
 				logger.log(Level.WARNING,
 						"Player already exists in db [Client " + clientId + "] - ClientStartupMessage");
-				out.writeObject(tmpMessage);
-				out.flush();
+				sendMessage(tmpMessage);
 				return;
 			} else {
 				DbHelper.addPlayer(tmpPlayer);
@@ -144,8 +140,7 @@ public class ClientThread extends Thread {
 				tmpMessage.setStatusCode(StatusCode.Success);
 				logger.log(Level.INFO,
 						"Player logged in successfully [Client " + clientId + "] - ClientStartupMessage");
-				out.writeObject(tmpMessage);
-				out.flush();
+				sendMessage(tmpMessage);
 				return;
 			}
 		} else if (inMessage.getActionType() == StartupAction.LoginAsGuest) {
@@ -161,8 +156,7 @@ public class ClientThread extends Thread {
 			tmpMessage.setLobbies(game.getLobbies());
 			tmpMessage.setStatusCode(StatusCode.Success);
 			logger.log(Level.INFO, "Guest logged in successfully [Client " + clientId + "] - ClientStartupMessage");
-			out.writeObject(tmpMessage);
-			out.flush();
+			sendMessage(tmpMessage);
 			return;
 		}
 	}
@@ -180,8 +174,7 @@ public class ClientThread extends Thread {
 				this.game.addLobby(tmpLobby);
 				tmpMessage.setPlayer(tmpPlayer);
 				tmpMessage.setStatusCode(StatusCode.Success);
-				out.writeObject(tmpMessage);
-				out.flush();
+				sendMessage(tmpMessage);
 				// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
 				// anderen Spieler ï¿½ber die neue Lobby Bescheid wissen.
 				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyCreated);
@@ -200,8 +193,7 @@ public class ClientThread extends Thread {
 					this.player.setLobby(null);
 					tmpMessage.setStatusCode(StatusCode.Success);
 					tmpMessage.setPlayer(this.player);
-					out.writeObject(tmpMessage);
-					out.flush();
+					sendMessage(tmpMessage);
 					ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
 					tmpBroadcast.setLobby(tmpLobby);
 					game.broadcastMessage(tmpBroadcast);
@@ -219,8 +211,7 @@ public class ClientThread extends Thread {
 				this.player.setLobby(null);
 				tmpMessage.setStatusCode(StatusCode.Success);
 				tmpMessage.setPlayer(this.player);
-				out.writeObject(tmpMessage);
-				out.flush();
+				sendMessage(tmpMessage);
 				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
 				tmpBroadcast.setLobby(tmpLobby);
 				game.broadcastMessage(tmpBroadcast);
@@ -253,8 +244,7 @@ public class ClientThread extends Thread {
 				if (!lobbyFound) {
 					tmpMessage.setPlayer(tmpPlayer);
 					tmpMessage.setStatusCode(StatusCode.LobbyNotAvailable);
-					out.writeObject(tmpMessage);
-					out.flush(); 
+					sendMessage(tmpMessage);
 					return;					
 				}
 				
@@ -262,8 +252,7 @@ public class ClientThread extends Thread {
 				if (tmpActualLobby.getNumPlayers() == this.game.countLobbyPlayers(tmpActualLobby)) {
 					tmpMessage.setPlayer(tmpPlayer);
 					tmpMessage.setStatusCode(StatusCode.LobbyMaxPlayerReached);
-					out.writeObject(tmpMessage);
-					out.flush();
+					sendMessage(tmpMessage);
 					break;
 				} else {					
 					this.player.setLobby(tmpActualLobby);
@@ -276,8 +265,7 @@ public class ClientThread extends Thread {
 					tmpMessage.setLobby(tmpActualLobby);
 					
 					tmpMessage.setStatusCode(StatusCode.Success);
-					out.writeObject(tmpMessage);
-					out.flush();
+					sendMessage(tmpMessage);
 					// Zusï¿½tzlich zur Antwort an den Beitretende einen Broadcast absetzen, damit die
 					// andere Spieler über den neuen Spieler Bescheid wissen.
 					ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerJoined);
@@ -305,8 +293,7 @@ public class ClientThread extends Thread {
 			}
 			inMessage.setPlayer(tmpPlayer);
 			inMessage.setCard(tmpCard);
-			out.writeObject(inMessage);
-			out.flush();
+			sendMessage(inMessage);
 			break;
 		}
 
@@ -326,8 +313,7 @@ public class ClientThread extends Thread {
 				inMessage.setPlayer(tmpPlayer);
 				inMessage.setCard(tmpCard);
 				inMessage.setBoard(tmpBoard);
-				out.writeObject(inMessage);
-				out.flush();
+				sendMessage(inMessage);
 				break;
 
 			}
@@ -341,8 +327,7 @@ public class ClientThread extends Thread {
 			tmpPlayer.monetizeCard(tmpCard);
 
 			inMessage.setPlayer(tmpPlayer);
-			out.writeObject(inMessage);
-			out.flush();
+			sendMessage(inMessage);
 			break;
 		}
 		default:
@@ -352,6 +337,7 @@ public class ClientThread extends Thread {
 	
 	public void sendMessage(Message inMessage) throws IOException {
 		logger.log(Level.INFO, "sending message" + inMessage.getClass().getName());
+		out.reset();
 		out.writeObject(inMessage);
 		out.flush();
 	}
@@ -363,7 +349,4 @@ public class ClientThread extends Thread {
 	public void setPlayer(IPlayer player) {
 		this.player = player;
 	}
-	
-	
-
 }
