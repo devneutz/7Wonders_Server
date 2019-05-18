@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -213,6 +214,54 @@ public class ClientThread extends Thread {
 				tmpMessage.setPlayer(this.player);
 				sendMessage(tmpMessage);
 				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
+				tmpBroadcast.setLobby(tmpLobby);
+				game.broadcastMessage(tmpBroadcast);
+				break;
+								
+				}
+			case StartLobby: {
+				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.StartLobby);
+				ILobby tmpLobby = inMessage.getLobby();
+				IPlayer tmpPlayer = inMessage.getPlayer();
+				//Zufällige Zuweisung von Board an Player
+				Random random = new Random();
+				for(int i=tmpLobby.getNumPlayers(); i==0; i--) {
+					tmpLobby.getLobbyPlayers().get(i).setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
+				}
+				//Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen und aus ListofCard entfernen
+				ArrayList<ICard> tmpCardList = new ArrayList<ICard>();
+				for(int i=game.getListOfCards().size(); i==0; i--) {
+					//Karten in tmpCardList speicher welche ins erste Zeitalter gehören
+					if(game.getListOfCards().get(i).getAge()==Age.AgeI) {
+						tmpCardList.add(game.getListOfCards().get(i));			
+					}
+				}
+				//tmpCardListForPlayer ist temporäres Array für die Zuweisung der ersten 7 Karten für den Spieler
+				ArrayList<ICard> tmpCardListForPlayer = new ArrayList<ICard>();
+				for(int i=tmpLobby.getNumPlayers(); i==0; i--) {
+					//CardListForPlayer ist eine Kopie von tmpCardListforPlayer und wird bei jedem neuen Spieler neu abgefüllt
+					ArrayList<ICard> CardListForPlayer = new ArrayList<ICard>();
+					for(int z=1; z==7; z++) {
+						//Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
+						tmpCardListForPlayer.add(tmpCardList.get(random.nextInt(tmpCardList.size())));
+					}
+					//for-Schleife für die Kopie der 7 Karten von tmpCardListForPlayer zu CardListForPlayer
+					for (int c = 0 ; c<tmpCardListForPlayer.size();c++){
+						
+						CardListForPlayer.add(tmpCardListForPlayer.get(c)) ;
+					}
+					//Übergabe des Arrays mit den 7 Karten an den Spieler
+					tmpLobby.getLobbyPlayers().get(i).setCards(CardListForPlayer);
+					//Alle Elemente auf tmpCardListForPlayer werden gelöscht, damit Sie auch aus der ursprünglichen Liste aller Karten verschwinden. So sind
+					//nur noch die Karten in der ursprünglichen Liste welche wirklich noch einem Spieler zugewiesen werden können.
+					tmpCardListForPlayer.clear();
+										
+				}
+				game.addLobby(tmpLobby);
+				tmpMessage.setStatusCode(StatusCode.Success);
+				tmpMessage.setPlayer(this.player);
+				sendMessage(tmpMessage);
+				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyStarted);
 				tmpBroadcast.setLobby(tmpLobby);
 				game.broadcastMessage(tmpBroadcast);
 				break;
