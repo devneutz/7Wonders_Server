@@ -7,12 +7,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ch.fhnw.sevenwonders.enums.Age;
 import ch.fhnw.sevenwonders.enums.LobbyAction;
+import ch.fhnw.sevenwonders.enums.StatusCode;
 import ch.fhnw.sevenwonders.helper.DbHelper;
 import ch.fhnw.sevenwonders.helper.InitHelper;
 import ch.fhnw.sevenwonders.interfaces.IBoard;
@@ -105,13 +108,13 @@ public class Game extends Thread{
 		return getPlayersForLobby(lobby).size();
 	}
 	
-	public ArrayList<IPlayer> getPlayersForLobby(ILobby inLobby){
-		ArrayList<IPlayer> tmpPlayers = new ArrayList<IPlayer>();
+	public ArrayList<ClientThread> getPlayersForLobby(ILobby inLobby){
+		ArrayList<ClientThread> tmpPlayers = new ArrayList<ClientThread>();
 		synchronized(this.clients) {
 			for(int x = 0; x < this.clients.size(); x++) {
 				if(clients.get(x).getPlayer().getLobby() != null) {
-					if(clients.get(x).getPlayer().getLobby().getLobbyName() == inLobby.getLobbyName()) {
-						tmpPlayers.add(clients.get(x).getPlayer());
+					if(clients.get(x).getPlayer().getLobby().getLobbyName().equals(inLobby.getLobbyName())) {
+						tmpPlayers.add(clients.get(x));
 					}
 				
 				}
@@ -125,11 +128,28 @@ public class Game extends Thread{
 			this.clients.remove(inClient);
 		}
 		
+		if (inClient.getPlayer().getLobby().getLobbyMaster().getName().equalsIgnoreCase(inClient.getPlayer().getName())) {
+			this.removeLobby(inClient.getPlayer().getLobby());
+			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
+			tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
+			broadcastMessage(tmpBroadcast);
+		}
+		
 		if(inClient.getPlayer().getLobby() != null) {
 			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
 			tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
 			tmpBroadcast.setPlayer(inClient.getPlayer());
 			broadcastMessage(tmpBroadcast);
+		}
+	}
+	
+	public void sendMessageToPlayer(IPlayer inPlayer, Message inMessage) throws IOException {
+		synchronized(this.clients) {
+			for(int x = 0; x < this.clients.size(); x++) {
+					if(clients.get(x).getPlayer().getName().equals(inPlayer.getName())) {
+						clients.get(x).sendMessage(inMessage);
+					}
+			}	
 		}
 	}
 }
