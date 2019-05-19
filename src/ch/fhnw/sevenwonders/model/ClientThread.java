@@ -21,7 +21,7 @@ import ch.fhnw.sevenwonders.models.Player;
  * 
  * @author Gabriel de Castilho, Joel Neutzner, Matteo Farneti, Ismael Liuzzi
  * 
- *         Diese Klasse stellt den ClientThread f�r den Server dar. Hier wird
+ *         Diese Klasse stellt den ClientThread fuer den Server dar. Hier wird
  *         jede Client Anfrage separat in einem eigenen Thread verarbeitet.
  *
  */
