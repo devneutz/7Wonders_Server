@@ -350,8 +350,7 @@ public class ClientThread extends Thread {
 			// What board does the player have? What stages have already been built? -> try
 			// to build the next stage
 			int tmpStageToBuild = inMessage.getPlayer().getBoard().getNextStageToBuild();
-			if (inMessage.getPlayer().getBoard().canBuild(tmpStageToBuild,
-					inMessage.getPlayer().getPlayerResources())) {
+			if (inMessage.getPlayer().getBoard().canBuild(inMessage.getPlayer())) {
 				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
 				IBoard tmpBoard = ((ClientGameMessage) inMessage).getBoard();
