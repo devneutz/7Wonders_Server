@@ -167,7 +167,13 @@ public class InitHelper {
 		tmpCostThree.addAll(Arrays.asList(ResourceType.Ore, ResourceType.Ore, ResourceType.Ore, ResourceType.Ore));
 				
 		tmpBoardList.add(new Board("Rhodos B", tmpResource, tmpValueOne, tmpCostOne, tmpValueTwo, tmpCostTwo, tmpValueThree, tmpCostThree, "Board_Rhodos_B.jpg"));
-				
+		
+		for( int x = 0; x < tmpBoardList.size(); x++) { //@JOE fragen
+			if(tmpBoardList.get(x).getImageName().equals("Board_Rhodos_B.jpg")) {
+				tmpBoardList.get(x).setStepOneBuilt(true);
+			}
+		}
+		
 		tmpResource.clear();
 		tmpValueOne.clear();
 		tmpCostOne.clear();
