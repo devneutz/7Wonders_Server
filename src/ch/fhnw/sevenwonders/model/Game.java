@@ -108,13 +108,13 @@ public class Game extends Thread{
 		return getPlayersForLobby(lobby).size();
 	}
 	
-	public ArrayList<IPlayer> getPlayersForLobby(ILobby inLobby){
-		ArrayList<IPlayer> tmpPlayers = new ArrayList<IPlayer>();
+	public ArrayList<ClientThread> getPlayersForLobby(ILobby inLobby){
+		ArrayList<ClientThread> tmpPlayers = new ArrayList<ClientThread>();
 		synchronized(this.clients) {
 			for(int x = 0; x < this.clients.size(); x++) {
 				if(clients.get(x).getPlayer().getLobby() != null) {
 					if(clients.get(x).getPlayer().getLobby().getLobbyName().equals(inLobby.getLobbyName())) {
-						tmpPlayers.add(clients.get(x).getPlayer());
+						tmpPlayers.add(clients.get(x));
 					}
 				
 				}
@@ -140,6 +140,16 @@ public class Game extends Thread{
 			tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
 			tmpBroadcast.setPlayer(inClient.getPlayer());
 			broadcastMessage(tmpBroadcast);
+		}
+	}
+	
+	public void sendMessageToPlayer(IPlayer inPlayer, Message inMessage) throws IOException {
+		synchronized(this.clients) {
+			for(int x = 0; x < this.clients.size(); x++) {
+					if(clients.get(x).getPlayer().getName().equals(inPlayer.getName())) {
+						clients.get(x).sendMessage(inMessage);
+					}
+			}	
 		}
 	}
 }

@@ -235,8 +235,12 @@ public class ClientThread extends Thread {
 				
 				//Zufällige Zuweisung von Board an Player
 				Random random = new Random();
-				for(IPlayer pl : game.getPlayersForLobby(tmpLobby)) {
-					pl.setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
+				for(ClientThread c : game.getPlayersForLobby(tmpLobby)) {
+					this.addOpponent(c.getPlayer());
+				}
+				
+				for(ClientThread c : game.getPlayersForLobby(tmpLobby)) {
+					c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
 				
 					ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 					for(int z=0; z<7; z++) {
@@ -244,12 +248,18 @@ public class ClientThread extends Thread {
 						tmpCardStack.add(tmpCardList.get(random.nextInt(tmpCardList.size()-1)));
 					}					
 					//Übergabe des Arrays mit den 7 Karten an den Spieler
-					pl.setCardStack(tmpCardStack);		
+					c.getPlayer().setCardStack(tmpCardStack);
+					if(!c.getPlayer().getName().equals(this.getPlayer().getName())) {					
+						for(IPlayer o : opponents) {
+							logger.log(Level.INFO, "Thread [" + c.getPlayer().getName() + "]: Setzen der Gegenspieler - '"+ o.getName() +"'");
+							c.addOpponent(o);
+						}	
+					}
 					
 					ServerLobbyMessage tmpStartMessage = new ServerLobbyMessage(LobbyAction.LobbyStarted);
 					tmpStartMessage.setStatusCode(StatusCode.Success);
-					tmpStartMessage.setPlayer(pl);
-					sendMessage(tmpStartMessage);
+					tmpStartMessage.setPlayer(c.getPlayer());
+					c.sendMessage(tmpStartMessage);
 				}
 				
 				game.removeLobby(tmpLobby);
@@ -317,20 +327,55 @@ public class ClientThread extends Thread {
 		}
 	}
 	
-	private void handleGameMessages(ClientGameMessage inMessage) throws IOException, InterruptedException {
-		logger.log(Level.INFO, "Client [" + clientId + "] hat gespielt");
+	private void handleGameMessages(ClientGameMessage inMessage) throws IOException, InterruptedException {		
 		// Is action valid?
 		switch (inMessage.getAction()) {
 		case PlayCard: {
-			IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
+			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: PlayCard ausgelöst");
+			ServerGameMessage tmpMessage = new ServerGameMessage(GameAction.PlayCard);
 			ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
-
-			if (((ClientGameMessage) inMessage).getAction() == GameAction.PlayCard) {
-				tmpPlayer.playCard(tmpCard);
+			this.player.setHasPlayedCard(true);
+			
+			this.player.playCard(tmpCard);
+			
+			tmpMessage.setPlayer(this.player);
+			
+			tmpMessage.setCard(tmpCard);
+			tmpMessage.setStatusCode(StatusCode.Success);
+			sendMessage(tmpMessage);
+			
+			boolean roundFinished = true;
+			for(IPlayer opp : opponents) {
+				if(!opp.getHasPlayedCard()) {
+					logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Gegenspieler '" + opp.getName() + "' hat noch nicht gespielt");
+					roundFinished = false;
+					break;
+				}
 			}
-			inMessage.setPlayer(tmpPlayer);
-			inMessage.setCard(tmpCard);
-			sendMessage(inMessage);
+			if(roundFinished) {
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Runde abgeschlossen");
+				
+				ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
+				tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
+				ArrayList<IPlayer> tmpOpp = new ArrayList<IPlayer>();
+				tmpOpp.addAll(opponents);
+				tmpOpp.add(this.player);
+				for(int i = 0; i < tmpOpp.size(); i++) {
+					int tmpOpponentIndexToTakeCardsFrom = 0;
+					if(i== 0) {
+						tmpOpponentIndexToTakeCardsFrom = tmpOpp.size()-1;
+					}
+					else {
+						tmpOpponentIndexToTakeCardsFrom = i - 1;
+					}
+
+					logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Spieler '"+tmpOpp.get(i).getName()+"' nimmt Karten von Spieler '"+tmpOpp.get(tmpOpponentIndexToTakeCardsFrom).getName()+"'");
+					tmpOpp.get(i).setCardStack(tmpOpp.get(tmpOpponentIndexToTakeCardsFrom).getCardStack());
+					tmpNewRoundMessage.setPlayer(tmpOpp.get(i));
+					
+					game.sendMessageToPlayer(tmpOpp.get(i), tmpNewRoundMessage);
+				}
+			}
 			break;
 		}
 
@@ -371,8 +416,7 @@ public class ClientThread extends Thread {
 		}
 	}
 	
-	public void sendMessage(Message inMessage) throws IOException {
-		logger.log(Level.INFO, "sending message" + inMessage.getClass().getName());
+	public void sendMessage(Message inMessage) throws IOException {		
 		out.reset();
 		out.writeObject(inMessage);
 		out.flush();
@@ -384,5 +428,11 @@ public class ClientThread extends Thread {
 
 	public void setPlayer(IPlayer player) {
 		this.player = player;
+	}
+	
+	public void addOpponent(IPlayer inOpponent) {
+		if(!inOpponent.getName().equals(this.player.getName())) {
+			this.opponents.add(inOpponent);
+		}
 	}
 }
