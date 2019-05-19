@@ -113,7 +113,7 @@ public class Game extends Thread{
 		synchronized(this.clients) {
 			for(int x = 0; x < this.clients.size(); x++) {
 				if(clients.get(x).getPlayer().getLobby() != null) {
-					if(clients.get(x).getPlayer().getLobby().getLobbyName() == inLobby.getLobbyName()) {
+					if(clients.get(x).getPlayer().getLobby().getLobbyName().equals(inLobby.getLobbyName())) {
 						tmpPlayers.add(clients.get(x).getPlayer());
 					}
 				
