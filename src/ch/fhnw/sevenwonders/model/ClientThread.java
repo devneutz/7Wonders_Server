@@ -250,10 +250,9 @@ public class ClientThread extends Thread {
 					//Übergabe des Arrays mit den 7 Karten an den Spieler
 					c.getPlayer().setCardStack(tmpCardStack);
 					if(!c.getPlayer().getName().equals(this.getPlayer().getName())) {					
-						for(IPlayer o : opponents) {
-							logger.log(Level.INFO, "Thread [" + c.getPlayer().getName() + "]: Setzen der Gegenspieler - '"+ o.getName() +"'");
-							c.addOpponent(o);
-						}	
+						for(ClientThread x : game.getPlayersForLobby(tmpLobby)) {
+							c.addOpponent(x.getPlayer());
+						}
 					}
 					
 					ServerLobbyMessage tmpStartMessage = new ServerLobbyMessage(LobbyAction.LobbyStarted);
@@ -344,38 +343,8 @@ public class ClientThread extends Thread {
 			tmpMessage.setStatusCode(StatusCode.Success);
 			sendMessage(tmpMessage);
 			
-			boolean roundFinished = true;
-			for(IPlayer opp : opponents) {
-				if(!opp.getHasPlayedCard()) {
-					logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Gegenspieler '" + opp.getName() + "' hat noch nicht gespielt");
-					roundFinished = false;
-					break;
-				}
-			}
-			if(roundFinished) {
-				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Runde abgeschlossen");
-				
-				ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
-				tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
-				ArrayList<IPlayer> tmpOpp = new ArrayList<IPlayer>();
-				tmpOpp.addAll(opponents);
-				tmpOpp.add(this.player);
-				for(int i = 0; i < tmpOpp.size(); i++) {
-					int tmpOpponentIndexToTakeCardsFrom = 0;
-					if(i== 0) {
-						tmpOpponentIndexToTakeCardsFrom = tmpOpp.size()-1;
-					}
-					else {
-						tmpOpponentIndexToTakeCardsFrom = i - 1;
-					}
-
-					logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Spieler '"+tmpOpp.get(i).getName()+"' nimmt Karten von Spieler '"+tmpOpp.get(tmpOpponentIndexToTakeCardsFrom).getName()+"'");
-					tmpOpp.get(i).setCardStack(tmpOpp.get(tmpOpponentIndexToTakeCardsFrom).getCardStack());
-					tmpNewRoundMessage.setPlayer(tmpOpp.get(i));
-					
-					game.sendMessageToPlayer(tmpOpp.get(i), tmpNewRoundMessage);
-				}
-			}
+			tryFinishTurn();
+			
 			break;
 		}
 
@@ -432,7 +401,50 @@ public class ClientThread extends Thread {
 	
 	public void addOpponent(IPlayer inOpponent) {
 		if(!inOpponent.getName().equals(this.player.getName())) {
+			logger.log(Level.INFO, "Thread [" + getPlayer().getName() + "]: Setzen der Gegenspieler - '"+ inOpponent.getName() +"'");
 			this.opponents.add(inOpponent);
+		}
+	}
+	
+	public void tryFinishTurn() throws IOException {
+		boolean roundFinished = true;
+		for(IPlayer opp : opponents) {
+			if(!opp.getHasPlayedCard()) {
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Gegenspieler '" + opp.getName() + "' hat noch nicht gespielt");
+				roundFinished = false;
+				break;
+			}
+		}
+		if(roundFinished) {
+			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Runde abgeschlossen");
+			
+			ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
+			tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
+			
+			ArrayList<ArrayList<ICard>> tmpCardStacks = new ArrayList<ArrayList<ICard>>();				
+			
+			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
+			tmpAllPlayers.add(this.player);
+			tmpAllPlayers.addAll(opponents);
+			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo( o2.getName() ));
+			
+			for(IPlayer p : tmpAllPlayers) {
+				tmpCardStacks.add((ArrayList<ICard>)p.getCardStack().clone());
+			}
+			
+			for(int i = 0; i < tmpAllPlayers.size(); i++) {
+				int tmpIndexToTakeCardsFrom = i + 1;
+				if(tmpIndexToTakeCardsFrom > tmpAllPlayers.size()-1) {
+					tmpIndexToTakeCardsFrom = 0;
+				}
+
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Spieler '"+tmpAllPlayers.get(i).getName()+"' nimmt Karten von Spieler '"+tmpAllPlayers.get(tmpIndexToTakeCardsFrom).getName()+"'");
+				tmpAllPlayers.get(i).setCardStack(tmpCardStacks.get(tmpIndexToTakeCardsFrom));
+				tmpAllPlayers.get(i).setHasPlayedCard(false);
+				tmpNewRoundMessage.setPlayer(tmpAllPlayers.get(i));
+				
+				game.sendMessageToPlayer(tmpAllPlayers.get(i), tmpNewRoundMessage);
+			}
 		}
 	}
 }
