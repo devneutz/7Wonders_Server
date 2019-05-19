@@ -378,6 +378,7 @@ public class ClientThread extends Thread {
 
 			tmpMessage.setCard(tmpCard);
 			tmpMessage.setPlayer(this.player);
+			tmpMessage.setStatusCode(StatusCode.Success);
 			sendMessage(tmpMessage);			
 
 			tryFinishTurn();
@@ -450,6 +451,8 @@ public class ClientThread extends Thread {
 				}					
 				//Übergabe des Arrays mit den 7 Karten an den Spieler
 				p.setCardStack(tmpCardStack);
+
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zuweisen des neuen Stacks an '" + p.getName() + "'");
 				
 				ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
 				tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
