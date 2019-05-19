@@ -231,7 +231,7 @@ public class InitHelper {
 		tmpValue.add(ResourceType.Stone);
 		tmpValue.add(ResourceType.Clay);
 		
-		tmpCardList.add(new Card("Ausgrabungsstätte", Age.AgeI, CardType.RawMaterials, 4, ValueCalculationType.Or, tmpValue, tmpCosts, false, "RM_Ausgrabungsstaette_4.jpg"));
+		tmpCardList.add(new Card("Ausgrabungsstaette", Age.AgeI, CardType.RawMaterials, 4, ValueCalculationType.Or, tmpValue, tmpCosts, false, "RM_Ausgrabungsstaette_4.jpg"));
 		
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -286,7 +286,7 @@ public class InitHelper {
 		tmpValue.add(ResourceType.Ore);
 		tmpValue.add(ResourceType.Wood);
 				
-		tmpCardList.add(new Card("Waldhöhle", Age.AgeI, CardType.RawMaterials, 5, ValueCalculationType.Or, tmpValue, tmpCosts, false, "RM_Waldhoehle_5.jpg"));
+		tmpCardList.add(new Card("Waldhoehle", Age.AgeI, CardType.RawMaterials, 5, ValueCalculationType.Or, tmpValue, tmpCosts, false, "RM_Waldhoehle_5.jpg"));
 				
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -295,10 +295,10 @@ public class InitHelper {
 		
 		tmpValue.add(ResourceType.Glas);
 				
-		tmpCardList.add(new Card("Glashütte", Age.AgeI, CardType.ManufacturedGoods, 3, null, tmpValue, tmpCosts, false, "MG_Glashuette_3.jpg"));
-		tmpCardList.add(new Card("Glashütte", Age.AgeI, CardType.ManufacturedGoods, 6, null, tmpValue, tmpCosts, false, "MG_Glashuette_6.jpg"));
-		tmpCardList.add(new Card("Glashütte", Age.AgeII, CardType.ManufacturedGoods, 3, null, tmpValue, tmpCosts, false, "MG_Glashuette_3.jpg"));
-		tmpCardList.add(new Card("Glashütte", Age.AgeII, CardType.ManufacturedGoods, 5, null, tmpValue, tmpCosts, false, "MG_Glashuette_5.jpg"));
+		tmpCardList.add(new Card("Glashuette", Age.AgeI, CardType.ManufacturedGoods, 3, null, tmpValue, tmpCosts, false, "MG_Glashuette_3.jpg"));
+		tmpCardList.add(new Card("Glashuette", Age.AgeI, CardType.ManufacturedGoods, 6, null, tmpValue, tmpCosts, false, "MG_Glashuette_6.jpg"));
+		tmpCardList.add(new Card("Glashuette", Age.AgeII, CardType.ManufacturedGoods, 3, null, tmpValue, tmpCosts, false, "MG_Glashuette_3.jpg"));
+		tmpCardList.add(new Card("Glashuette", Age.AgeII, CardType.ManufacturedGoods, 5, null, tmpValue, tmpCosts, false, "MG_Glashuette_5.jpg"));
 				
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -359,8 +359,8 @@ public class InitHelper {
 		tmpValue.add(ResourceType.VictoryPoint);
 		tmpValue.add(ResourceType.VictoryPoint);
 		
-		tmpCardList.add(new Card("Bäder", Age.AgeI, CardType.CivilianStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Baeder_3.jpg"));
-		tmpCardList.add(new Card("Bäder", Age.AgeI, CardType.CivilianStructures, 7, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Baeder_7.jpg"));
+		tmpCardList.add(new Card("Baeder", Age.AgeI, CardType.CivilianStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Baeder_3.jpg"));
+		tmpCardList.add(new Card("Baeder", Age.AgeI, CardType.CivilianStructures, 7, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Baeder_7.jpg"));
 		
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -476,8 +476,8 @@ public class InitHelper {
 		tmpValue.add(ResourceType.Wood);
 		tmpValue.add(ResourceType.Wood);
 		
-		tmpCardList.add(new Card("Sägewerk", Age.AgeII, CardType.RawMaterials, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "RM_Saegewerk_3.jpg"));
-		tmpCardList.add(new Card("Sägewerk", Age.AgeII, CardType.RawMaterials, 4, ValueCalculationType.And, tmpValue, tmpCosts, false, "RM_Saegewerk_4.jpg"));
+		tmpCardList.add(new Card("Saegewerk", Age.AgeII, CardType.RawMaterials, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "RM_Saegewerk_3.jpg"));
+		tmpCardList.add(new Card("Saegewerk", Age.AgeII, CardType.RawMaterials, 4, ValueCalculationType.And, tmpValue, tmpCosts, false, "RM_Saegewerk_4.jpg"));
 		
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -505,8 +505,8 @@ public class InitHelper {
 		tmpValue.add(ResourceType.VictoryPoint);
 		tmpValue.add(ResourceType.VictoryPoint);
 		
-		tmpCardList.add(new Card("Aquädukt", Age.AgeII, CardType.CivilianStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Aquaedukt_3.jpg"));
-		tmpCardList.add(new Card("Aquädukt", Age.AgeII, CardType.CivilianStructures, 7, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Aquaedukt_7.jpg"));
+		tmpCardList.add(new Card("Aquaedukt", Age.AgeII, CardType.CivilianStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Aquaedukt_3.jpg"));
+		tmpCardList.add(new Card("Aquaedukt", Age.AgeII, CardType.CivilianStructures, 7, ValueCalculationType.And, tmpValue, tmpCosts, false, "CS_Aquaedukt_7.jpg"));
 		
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -645,8 +645,8 @@ public class InitHelper {
 		tmpValue.add(ResourceType.MilitaryMight);
 		tmpValue.add(ResourceType.MilitaryMight);
 		
-		tmpCardList.add(new Card("Ställe", Age.AgeII, CardType.MilitaryStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Staelle_3.jpg"));
-		tmpCardList.add(new Card("Ställe", Age.AgeII, CardType.MilitaryStructures, 5, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Staelle_5.jpg"));
+		tmpCardList.add(new Card("Staelle", Age.AgeII, CardType.MilitaryStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Staelle_3.jpg"));
+		tmpCardList.add(new Card("Staelle", Age.AgeII, CardType.MilitaryStructures, 5, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Staelle_5.jpg"));
 		
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -659,9 +659,9 @@ public class InitHelper {
 		tmpValue.add(ResourceType.MilitaryMight);
 		tmpValue.add(ResourceType.MilitaryMight);
 		
-		tmpCardList.add(new Card("Trainingsgelände", Age.AgeII, CardType.MilitaryStructures, 4, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Trainingsgelaende_4.jpg"));
-		tmpCardList.add(new Card("Trainingsgelände", Age.AgeII, CardType.MilitaryStructures, 6, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Trainingsgelaende_6.jpg"));
-		tmpCardList.add(new Card("Trainingsgelände", Age.AgeII, CardType.MilitaryStructures, 7, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Trainingsgelaende_7.jpg"));
+		tmpCardList.add(new Card("Trainingsgelaende", Age.AgeII, CardType.MilitaryStructures, 4, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Trainingsgelaende_4.jpg"));
+		tmpCardList.add(new Card("Trainingsgelaende", Age.AgeII, CardType.MilitaryStructures, 6, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Trainingsgelaende_6.jpg"));
+		tmpCardList.add(new Card("Trainingsgelaende", Age.AgeII, CardType.MilitaryStructures, 7, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Trainingsgelaende_7.jpg"));
 
 		tmpCosts.clear();
 		tmpValue.clear();
