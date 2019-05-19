@@ -233,7 +233,6 @@ public class ClientThread extends Thread {
 					}
 				}
 				
-				//Zufällige Zuweisung von Board an Player
 				Random random = new Random();
 				for(ClientThread c : game.getPlayersForLobby(tmpLobby)) {
 					this.addOpponent(c.getPlayer());
@@ -370,14 +369,18 @@ public class ClientThread extends Thread {
 
 			return;
 		case MonetizeCard: {
-			IPlayer tmpPlayer = inMessage.getPlayer();
+			ServerGameMessage tmpMessage = new ServerGameMessage(GameAction.PlayCard);
 			ICard tmpCard = inMessage.getCard();
-			
-			// Muenze die Karte um
-			tmpPlayer.monetizeCard(tmpCard);
+			this.player.setHasPlayedCard(true);
 
-			inMessage.setPlayer(tmpPlayer);
-			sendMessage(inMessage);
+			//Muenze die Karte um
+			this.player.monetizeCard(tmpCard);
+
+			tmpMessage.setCard(tmpCard);
+			tmpMessage.setPlayer(this.player);
+			sendMessage(tmpMessage);			
+
+			tryFinishTurn();
 			break;
 		}
 		default:
@@ -412,9 +415,52 @@ public class ClientThread extends Thread {
 			if(!opp.getHasPlayedCard()) {
 				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Gegenspieler '" + opp.getName() + "' hat noch nicht gespielt");
 				roundFinished = false;
-				break;
+				return;
 			}
 		}
+		
+		boolean ageFinished = this.player.getCardStack().size() == 1;
+		
+		if(ageFinished) {
+			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zeitalter abgeschlossen");
+			
+
+			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Verteilen von neuen Karten-Stacks");
+			//Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen und aus ListofCard entfernen
+			ArrayList<ICard> tmpAgeIICards = new ArrayList<ICard>();
+			for(int i= 0; i < game.getListOfCards().size();i++) {
+				//Karten in tmpCardList speicher welche ins erste Zeitalter gehören
+				if(game.getListOfCards().get(i).getAge()==Age.AgeII) {
+					tmpAgeIICards.add(game.getListOfCards().get(i));			
+				}
+			}
+			
+			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
+			tmpAllPlayers.add(this.player);
+			tmpAllPlayers.addAll(opponents);
+			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo( o2.getName() ));
+
+			Random random = new Random();
+			
+			for(IPlayer p : tmpAllPlayers) {
+				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
+				for(int z=0; z<7; z++) {
+					//Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
+					tmpCardStack.add(tmpAgeIICards.get(random.nextInt(tmpAgeIICards.size()-1)));
+				}					
+				//Übergabe des Arrays mit den 7 Karten an den Spieler
+				p.setCardStack(tmpCardStack);
+				
+				ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
+				tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
+
+				tmpNewRoundMessage.setPlayer(p);
+				game.sendMessageToPlayer(p, tmpNewRoundMessage);
+			}
+			
+			return;
+		}
+		
 		if(roundFinished) {
 			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Runde abgeschlossen");
 			
