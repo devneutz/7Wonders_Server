@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import ch.fhnw.sevenwonders.enums.Age;
 import ch.fhnw.sevenwonders.enums.LobbyAction;
+import ch.fhnw.sevenwonders.enums.StatusCode;
 import ch.fhnw.sevenwonders.helper.DbHelper;
 import ch.fhnw.sevenwonders.helper.InitHelper;
 import ch.fhnw.sevenwonders.interfaces.IBoard;
@@ -125,6 +126,13 @@ public class Game extends Thread{
 	public void removeClient(ClientThread inClient) {
 		synchronized(this.clients) {
 			this.clients.remove(inClient);
+		}
+		
+		if (inClient.getPlayer().getLobby().getLobbyMaster().getName().equalsIgnoreCase(inClient.getPlayer().getName())) {
+			this.removeLobby(inClient.getPlayer().getLobby());
+			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
+			tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
+			broadcastMessage(tmpBroadcast);
 		}
 		
 		if(inClient.getPlayer().getLobby() != null) {
