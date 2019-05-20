@@ -257,6 +257,8 @@ public class ClientThread extends Thread {
 					ServerLobbyMessage tmpStartMessage = new ServerLobbyMessage(LobbyAction.LobbyStarted);
 					tmpStartMessage.setStatusCode(StatusCode.Success);
 					tmpStartMessage.setPlayer(c.getPlayer());
+
+					tmpStartMessage.setOpponents(c.getOpponents());
 					c.sendMessage(tmpStartMessage);
 				}
 				
@@ -410,6 +412,10 @@ public class ClientThread extends Thread {
 		}
 	}
 	
+	public ArrayList<IPlayer> getOpponents(){
+		return this.opponents;
+	}
+	
 	public void tryFinishTurn() throws IOException {
 		boolean roundFinished = true;
 		for(IPlayer opp : opponents) {
@@ -491,7 +497,9 @@ public class ClientThread extends Thread {
 				tmpAllPlayers.get(i).setCardStack(tmpCardStacks.get(tmpIndexToTakeCardsFrom));
 				tmpAllPlayers.get(i).setHasPlayedCard(false);
 				tmpNewRoundMessage.setPlayer(tmpAllPlayers.get(i));
-				
+				ArrayList<IPlayer> opp =(ArrayList<IPlayer>) tmpAllPlayers.clone();
+				opp.remove(tmpAllPlayers.get(i));
+				tmpNewRoundMessage.setOpponents(opp);
 				game.sendMessageToPlayer(tmpAllPlayers.get(i), tmpNewRoundMessage);
 			}
 		}

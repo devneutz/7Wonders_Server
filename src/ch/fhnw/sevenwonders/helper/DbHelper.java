@@ -62,10 +62,9 @@ public class DbHelper {
 			tmpCheckStatement.setString(1, inPlayer.getName());
 			ResultSet tmpResult = tmpCheckStatement.executeQuery();
 			if (tmpResult.next()) {
-
-				tmpCheckStatement.close();
 				String tmpPassword = tmpResult.getString("password");
 				DbConnectionPool.getInstance().returnConnection(tmpConnection);
+				tmpCheckStatement.close();
 				return inPlayer.getPassword().equalsIgnoreCase(tmpPassword);
 			} else {
 				tmpCheckStatement.close();
@@ -94,13 +93,11 @@ public class DbHelper {
 			tmpCheckStatement.setString(1, inPlayer.getName());
 			ResultSet tmpResult = tmpCheckStatement.executeQuery();
 			if (tmpResult.next()) {
-
-				tmpCheckStatement.close();
 				String tmpNickname = tmpResult.getString("nickname");
 				DbConnectionPool.getInstance().returnConnection(tmpConnection);
+				tmpCheckStatement.close();
 				return inPlayer.getName().equalsIgnoreCase(tmpNickname);
 			} else {
-
 				tmpCheckStatement.close();
 				DbConnectionPool.getInstance().returnConnection(tmpConnection);
 				return false;
@@ -124,7 +121,6 @@ public class DbHelper {
 					+ " values (?, ?, ?, ?, ?, ?)";
 			PreparedStatement tmpCheckStatement = tmpConnection.prepareStatement(tmpCheckQuery,
 					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			;
 			tmpCheckStatement.setString(1, inPlayer.getName());
 			tmpCheckStatement.setString(2, inPlayer.getPassword());
 			tmpCheckStatement.setInt(3, 0);
