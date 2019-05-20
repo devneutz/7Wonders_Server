@@ -112,6 +112,7 @@ public class Game extends Thread{
 		ArrayList<ClientThread> tmpPlayers = new ArrayList<ClientThread>();
 		synchronized(this.clients) {
 			for(int x = 0; x < this.clients.size(); x++) {
+				if(clients.get(x).getPlayer() == null) {continue;}
 				if(clients.get(x).getPlayer().getLobby() != null) {
 					if(clients.get(x).getPlayer().getLobby().getLobbyName().equals(inLobby.getLobbyName())) {
 						tmpPlayers.add(clients.get(x));

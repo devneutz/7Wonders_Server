@@ -273,18 +273,13 @@ public class ClientThread extends Thread {
 					for (ClientThread x : game.getPlayersForLobby(tmpLobby)) {
 						c.addOpponent(x.getPlayer());
 					}
-					
-					ServerLobbyMessage tmpStartMessage = new ServerLobbyMessage(LobbyAction.LobbyStarted);
-					tmpStartMessage.setStatusCode(StatusCode.Success);
-					tmpStartMessage.setPlayer(c.getPlayer());
-
-					tmpStartMessage.setOpponents(c.getOpponents());
-					c.sendMessage(tmpStartMessage);
 				}
 
 				ServerLobbyMessage tmpStartMessage = new ServerLobbyMessage(LobbyAction.LobbyStarted);
 				tmpStartMessage.setStatusCode(StatusCode.Success);
 				tmpStartMessage.setPlayer(c.getPlayer());
+
+				tmpStartMessage.setOpponents(c.getOpponents());
 				c.sendMessage(tmpStartMessage);
 			}
 
