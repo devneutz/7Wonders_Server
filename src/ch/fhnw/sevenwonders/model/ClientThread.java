@@ -67,10 +67,10 @@ public class ClientThread extends Thread {
 					handlingIncomingMessage((Message) inObject);
 				}
 			}
-		} catch(SocketException inEx) {
+		} catch (SocketException inEx) {
 			game.removeClient(this);
 			logger.log(Level.INFO, "Client disconnected [Client " + clientId + "]");
-		}catch (EOFException inEOFEx) {
+		} catch (EOFException inEOFEx) {
 		} catch (Exception inEx) {
 			logger.log(Level.SEVERE, "Error handling Message  [Client " + clientId + "]", inEx);
 		}
@@ -83,18 +83,18 @@ public class ClientThread extends Thread {
 	private void handlingIncomingMessage(Message inMessage) throws IOException, InterruptedException {
 		out.reset();
 		if (inMessage instanceof ClientStartupMessage) {
-			handleStartupMessages((ClientStartupMessage)inMessage);
+			handleStartupMessages((ClientStartupMessage) inMessage);
 		} else if (inMessage instanceof ClientLobbyMessage) {
 			handleLobbyMessages((ClientLobbyMessage) inMessage);
 		} else if (inMessage instanceof ClientGameMessage) {
-			handleGameMessages((ClientGameMessage)inMessage);
+			handleGameMessages((ClientGameMessage) inMessage);
 		}
 	}
 
 	private void handleStartupMessages(ClientStartupMessage inMessage) throws IOException, InterruptedException {
 		logger.log(Level.INFO, "Message received [Client " + clientId + "] - ClientStartupMessage");
 		ServerStartupMessage tmpMessage = new ServerStartupMessage(inMessage.getActionType());
-		IPlayer tmpPlayer =  inMessage.getPlayer();
+		IPlayer tmpPlayer = inMessage.getPlayer();
 
 		if (inMessage.getActionType() == StartupAction.Login) {
 
@@ -161,97 +161,117 @@ public class ClientThread extends Thread {
 			return;
 		}
 	}
-	
-	private void handleLobbyMessages(ClientLobbyMessage inMessage)  throws IOException, InterruptedException {
+
+	private void handleLobbyMessages(ClientLobbyMessage inMessage) throws IOException, InterruptedException {
 		switch (inMessage.getActionType()) {
-			case CreateLobby: {
-				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.CreateLobby);
-				IPlayer tmpPlayer = inMessage.getPlayer();
-				ILobby tmpLobby = inMessage.getLobby();
-				tmpPlayer.setLobby(tmpLobby);
-				tmpLobby.setLobbyMaster(tmpPlayer);
-				tmpLobby.addPlayer(tmpPlayer);
-				this.player.setLobby(tmpLobby);
-				this.game.addLobby(tmpLobby);
-				tmpMessage.setPlayer(tmpPlayer);
-				tmpMessage.setStatusCode(StatusCode.Success);
-				sendMessage(tmpMessage);
-				// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-				// anderen Spieler ï¿½ber die neue Lobby Bescheid wissen.
-				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyCreated);
-				tmpBroadcast.setLobby(tmpLobby);
-				game.broadcastMessage(tmpBroadcast);
-				break;
-			}
-			case DeleteLobby: {
-				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.DeleteLobby);
-				// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-				// anderen Spieler ï¿½ber die Lï¿½schung der Lobby Bescheid wissen.
-				ILobby tmpLobby = inMessage.getLobby();
-				IPlayer tmpPlayer = inMessage.getPlayer();
-				if (tmpLobby.getLobbyMaster().getName().equalsIgnoreCase(tmpPlayer.getName())) {
-					this.game.removeLobby(tmpLobby);
-					this.player.setLobby(null);
-					tmpMessage.setStatusCode(StatusCode.Success);
-					tmpMessage.setPlayer(this.player);
-					sendMessage(tmpMessage);
-					ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
-					tmpBroadcast.setLobby(tmpLobby);
-					game.broadcastMessage(tmpBroadcast);
-					break;
+		case CreateLobby: {
+			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.CreateLobby);
+			IPlayer tmpPlayer = inMessage.getPlayer();
+			ILobby tmpLobby = inMessage.getLobby();
+			boolean lobbyFound = false;
+			
+			// Existiert die Lobby tmpLobby bereits ?
+			synchronized (game.getLobbies()) {
+				Iterator<ILobby> iter = game.getLobbies().iterator();
+				while (iter.hasNext()) {
+					ILobby L = iter.next();
+					if (L.getLobbyName().equals(tmpLobby.getLobbyName())) {
+						lobbyFound = true;
+						break;
+					}
 				}
-				break;
 			}
-			case LeaveLobby: {
-				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.LeaveLobby);
-				// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-				// anderen Spieler ï¿½ber die Lï¿½schung der Lobby Bescheid wissen.
-				ILobby tmpLobby = inMessage.getLobby();
-				IPlayer tmpPlayer = inMessage.getPlayer();
-				//tmpLobby.removePlayer(tmpPlayer);
+			// Falls die Lobby bereits existiert, wirf einen Fehler zurueck
+			if (lobbyFound) {
+				tmpMessage.setPlayer(tmpPlayer);
+				tmpMessage.setStatusCode(StatusCode.LobbyAlreadyExists);
+				sendMessage(tmpMessage);
+				return;
+			}
+			tmpPlayer.setLobby(tmpLobby);
+			tmpLobby.setLobbyMaster(tmpPlayer);
+			tmpLobby.addPlayer(tmpPlayer);
+			this.player.setLobby(tmpLobby);
+			this.game.addLobby(tmpLobby);
+			tmpMessage.setPlayer(tmpPlayer);
+			tmpMessage.setStatusCode(StatusCode.Success);
+			sendMessage(tmpMessage);
+			// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+			// anderen Spieler ï¿½ber die neue Lobby Bescheid wissen.
+			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyCreated);
+			tmpBroadcast.setLobby(tmpLobby);
+			game.broadcastMessage(tmpBroadcast);
+			break;
+		}
+		case DeleteLobby: {
+			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.DeleteLobby);
+			// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+			// anderen Spieler ï¿½ber die Lï¿½schung der Lobby Bescheid wissen.
+			ILobby tmpLobby = inMessage.getLobby();
+			IPlayer tmpPlayer = inMessage.getPlayer();
+			if (tmpLobby.getLobbyMaster().getName().equalsIgnoreCase(tmpPlayer.getName())) {
+				this.game.removeLobby(tmpLobby);
 				this.player.setLobby(null);
 				tmpMessage.setStatusCode(StatusCode.Success);
 				tmpMessage.setPlayer(this.player);
 				sendMessage(tmpMessage);
-				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
+				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
 				tmpBroadcast.setLobby(tmpLobby);
 				game.broadcastMessage(tmpBroadcast);
 				break;
-								
+			}
+			break;
+		}
+		case LeaveLobby: {
+			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.LeaveLobby);
+			// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+			// anderen Spieler ï¿½ber die Lï¿½schung der Lobby Bescheid wissen.
+			ILobby tmpLobby = inMessage.getLobby();
+			IPlayer tmpPlayer = inMessage.getPlayer();
+			// tmpLobby.removePlayer(tmpPlayer);
+			this.player.setLobby(null);
+			tmpMessage.setStatusCode(StatusCode.Success);
+			tmpMessage.setPlayer(this.player);
+			sendMessage(tmpMessage);
+			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
+			tmpBroadcast.setLobby(tmpLobby);
+			game.broadcastMessage(tmpBroadcast);
+			break;
+
+		}
+		case StartLobby: {
+			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.StartLobby);
+			ILobby tmpLobby = inMessage.getLobby();
+			IPlayer tmpPlayer = inMessage.getPlayer();
+
+			// Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen
+			// und aus ListofCard entfernen
+			ArrayList<ICard> tmpCardList = new ArrayList<ICard>();
+			for (int i = 0; i < game.getListOfCards().size(); i++) {
+				// Karten in tmpCardList speicher welche ins erste Zeitalter gehören
+				if (game.getListOfCards().get(i).getAge() == Age.AgeI) {
+					tmpCardList.add(game.getListOfCards().get(i));
 				}
-			case StartLobby: {
-				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.StartLobby);
-				ILobby tmpLobby = inMessage.getLobby();
-				IPlayer tmpPlayer = inMessage.getPlayer();
-				
-				//Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen und aus ListofCard entfernen
-				ArrayList<ICard> tmpCardList = new ArrayList<ICard>();
-				for(int i= 0; i < game.getListOfCards().size();i++) {
-					//Karten in tmpCardList speicher welche ins erste Zeitalter gehören
-					if(game.getListOfCards().get(i).getAge()==Age.AgeI) {
-						tmpCardList.add(game.getListOfCards().get(i));			
-					}
+			}
+
+			Random random = new Random();
+			for (ClientThread c : game.getPlayersForLobby(tmpLobby)) {
+				this.addOpponent(c.getPlayer());
+			}
+
+			for (ClientThread c : game.getPlayersForLobby(tmpLobby)) {
+				c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
+
+				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
+				for (int z = 0; z < 7; z++) {
+					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
+					tmpCardStack.add(tmpCardList.get(random.nextInt(tmpCardList.size() - 1)));
 				}
-				
-				Random random = new Random();
-				for(ClientThread c : game.getPlayersForLobby(tmpLobby)) {
-					this.addOpponent(c.getPlayer());
-				}
-				
-				for(ClientThread c : game.getPlayersForLobby(tmpLobby)) {
-					c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
-				
-					ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
-					for(int z=0; z<7; z++) {
-						//Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
-						tmpCardStack.add(tmpCardList.get(random.nextInt(tmpCardList.size()-1)));
-					}					
-					//Übergabe des Arrays mit den 7 Karten an den Spieler
-					c.getPlayer().setCardStack(tmpCardStack);
-					if(!c.getPlayer().getName().equals(this.getPlayer().getName())) {					
-						for(ClientThread x : game.getPlayersForLobby(tmpLobby)) {
-							c.addOpponent(x.getPlayer());
-						}
+				// Übergabe des Arrays mit den 7 Karten an den Spieler
+				c.getPlayer().setCardStack(tmpCardStack);
+				if (!c.getPlayer().getName().equals(this.getPlayer().getName())) {
+					for (ClientThread x : game.getPlayersForLobby(tmpLobby)) {
+						c.addOpponent(x.getPlayer());
 					}
 					
 					ServerLobbyMessage tmpStartMessage = new ServerLobbyMessage(LobbyAction.LobbyStarted);
@@ -261,73 +281,79 @@ public class ClientThread extends Thread {
 					tmpStartMessage.setOpponents(c.getOpponents());
 					c.sendMessage(tmpStartMessage);
 				}
-				
-				game.removeLobby(tmpLobby);
-				break;			
-				}
-				
-			
-			case JoinLobby: {
-				ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.JoinLobby);				
-				ILobby tmpReceivedLobby = inMessage.getLobby();
-				ILobby tmpActualLobby = null;
-				IPlayer tmpPlayer = inMessage.getPlayer();
-				boolean lobbyFound = false;
-				
-				// Existiert die Lobby ueberhaupt?
-				synchronized(game.getLobbies()) {
-					Iterator<ILobby> iter = game.getLobbies().iterator();
-					while (iter.hasNext()) {
-						ILobby L = iter.next();
-						if (L.getLobbyName().equals(tmpReceivedLobby.getLobbyName())) {
-							lobbyFound = true; 
-							tmpActualLobby = L;
-							break;
-						}					
+
+				ServerLobbyMessage tmpStartMessage = new ServerLobbyMessage(LobbyAction.LobbyStarted);
+				tmpStartMessage.setStatusCode(StatusCode.Success);
+				tmpStartMessage.setPlayer(c.getPlayer());
+				c.sendMessage(tmpStartMessage);
+			}
+
+			game.removeLobby(tmpLobby);
+			break;
+		}
+
+		case JoinLobby: {
+			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.JoinLobby);
+			ILobby tmpReceivedLobby = inMessage.getLobby();
+			ILobby tmpActualLobby = null;
+			IPlayer tmpPlayer = inMessage.getPlayer();
+			boolean lobbyFound = false;
+
+			// Existiert die Lobby ueberhaupt?
+			synchronized (game.getLobbies()) {
+				Iterator<ILobby> iter = game.getLobbies().iterator();
+				while (iter.hasNext()) {
+					ILobby L = iter.next();
+					if (L.getLobbyName().equals(tmpReceivedLobby.getLobbyName())) {
+						lobbyFound = true;
+						tmpActualLobby = L;
+						break;
 					}
 				}
-				
-				// Falls die Lobby nicht existiert, wirf einen Fehler zurueck
-				if (!lobbyFound) {
-					tmpMessage.setPlayer(tmpPlayer);
-					tmpMessage.setStatusCode(StatusCode.LobbyNotAvailable);
-					sendMessage(tmpMessage);
-					return;					
-				}
-				
-				// Wenn die Lobby bereits voll ist, kann nicht gejoint werden.
-				if (tmpActualLobby.getNumPlayers() == this.game.countLobbyPlayers(tmpActualLobby)) {
-					tmpMessage.setPlayer(tmpPlayer);
-					tmpMessage.setStatusCode(StatusCode.LobbyMaxPlayerReached);
-					sendMessage(tmpMessage);
-					break;
-				} else {					
-					this.player.setLobby(tmpActualLobby);
-					tmpActualLobby.addPlayer(this.player);
-					
-					tmpPlayer = inMessage.getPlayer();
-					tmpPlayer.setLobby(tmpActualLobby);
-					
-					tmpMessage.setPlayer(tmpPlayer);
-					tmpMessage.setLobby(tmpActualLobby);
-					
-					tmpMessage.setStatusCode(StatusCode.Success);
-					sendMessage(tmpMessage);
-					// Zusï¿½tzlich zur Antwort an den Beitretende einen Broadcast absetzen, damit die
-					// andere Spieler über den neuen Spieler Bescheid wissen.
-					ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerJoined);
-					tmpBroadcast.setPlayer(tmpPlayer);
-					tmpBroadcast.setLobby(tmpActualLobby);
-					game.broadcastMessage(tmpBroadcast);					
-				}
-				break;
 			}
-			default:
+
+			// Falls die Lobby nicht existiert, wirf einen Fehler zurueck
+			if (!lobbyFound) {
+				tmpMessage.setPlayer(tmpPlayer);
+				tmpMessage.setStatusCode(StatusCode.LobbyNotAvailable);
+				sendMessage(tmpMessage);
+				return;
+			}
+
+			// Wenn die Lobby bereits voll ist, kann nicht gejoint werden.
+			if (tmpActualLobby.getNumPlayers() == this.game.countLobbyPlayers(tmpActualLobby)) {
+				tmpMessage.setPlayer(tmpPlayer);
+				tmpMessage.setStatusCode(StatusCode.LobbyMaxPlayerReached);
+				sendMessage(tmpMessage);
 				break;
+			} else {
+				this.player.setLobby(tmpActualLobby);
+				tmpActualLobby.addPlayer(this.player);
+
+				tmpPlayer = inMessage.getPlayer();
+				tmpPlayer.setLobby(tmpActualLobby);
+
+				tmpMessage.setPlayer(tmpPlayer);
+				tmpMessage.setLobby(tmpActualLobby);
+
+				tmpMessage.setStatusCode(StatusCode.Success);
+				sendMessage(tmpMessage);
+				// Zusï¿½tzlich zur Antwort an den Beitretende einen Broadcast absetzen, damit
+				// die
+				// andere Spieler über den neuen Spieler Bescheid wissen.
+				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerJoined);
+				tmpBroadcast.setPlayer(tmpPlayer);
+				tmpBroadcast.setLobby(tmpActualLobby);
+				game.broadcastMessage(tmpBroadcast);
+			}
+			break;
+		}
+		default:
+			break;
 		}
 	}
-	
-	private void handleGameMessages(ClientGameMessage inMessage) throws IOException, InterruptedException {		
+
+	private void handleGameMessages(ClientGameMessage inMessage) throws IOException, InterruptedException {
 		// Is action valid?
 		switch (inMessage.getAction()) {
 		case PlayCard: {
@@ -335,17 +361,17 @@ public class ClientThread extends Thread {
 			ServerGameMessage tmpMessage = new ServerGameMessage(GameAction.PlayCard);
 			ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
 			this.player.setHasPlayedCard(true);
-			
+
 			this.player.playCard(tmpCard);
-			
+
 			tmpMessage.setPlayer(this.player);
-			
+
 			tmpMessage.setCard(tmpCard);
 			tmpMessage.setStatusCode(StatusCode.Success);
 			sendMessage(tmpMessage);
-			
+
 			tryFinishTurn();
-			
+
 			break;
 		}
 
@@ -375,13 +401,13 @@ public class ClientThread extends Thread {
 			ICard tmpCard = inMessage.getCard();
 			this.player.setHasPlayedCard(true);
 
-			//Muenze die Karte um
+			// Muenze die Karte um
 			this.player.monetizeCard(tmpCard);
 
 			tmpMessage.setCard(tmpCard);
 			tmpMessage.setPlayer(this.player);
 			tmpMessage.setStatusCode(StatusCode.Success);
-			sendMessage(tmpMessage);			
+			sendMessage(tmpMessage);
 
 			tryFinishTurn();
 			break;
@@ -390,8 +416,8 @@ public class ClientThread extends Thread {
 			return;
 		}
 	}
-	
-	public void sendMessage(Message inMessage) throws IOException {		
+
+	public void sendMessage(Message inMessage) throws IOException {
 		out.reset();
 		out.writeObject(inMessage);
 		out.flush();
@@ -404,10 +430,11 @@ public class ClientThread extends Thread {
 	public void setPlayer(IPlayer player) {
 		this.player = player;
 	}
-	
+
 	public void addOpponent(IPlayer inOpponent) {
-		if(!inOpponent.getName().equals(this.player.getName())) {
-			logger.log(Level.INFO, "Thread [" + getPlayer().getName() + "]: Setzen der Gegenspieler - '"+ inOpponent.getName() +"'");
+		if (!inOpponent.getName().equals(this.player.getName())) {
+			logger.log(Level.INFO,
+					"Thread [" + getPlayer().getName() + "]: Setzen der Gegenspieler - '" + inOpponent.getName() + "'");
 			this.opponents.add(inOpponent);
 		}
 	}
@@ -415,85 +442,89 @@ public class ClientThread extends Thread {
 	public ArrayList<IPlayer> getOpponents(){
 		return this.opponents;
 	}
-	
 	public void tryFinishTurn() throws IOException {
 		boolean roundFinished = true;
-		for(IPlayer opp : opponents) {
-			if(!opp.getHasPlayedCard()) {
-				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Gegenspieler '" + opp.getName() + "' hat noch nicht gespielt");
+		for (IPlayer opp : opponents) {
+			if (!opp.getHasPlayedCard()) {
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Gegenspieler '" + opp.getName()
+						+ "' hat noch nicht gespielt");
 				roundFinished = false;
 				return;
 			}
 		}
-		
+
 		boolean ageFinished = this.player.getCardStack().size() == 1;
-		
-		if(ageFinished) {
+
+		if (ageFinished) {
 			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zeitalter abgeschlossen");
-			
 
 			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Verteilen von neuen Karten-Stacks");
-			//Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen und aus ListofCard entfernen
+			// Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen
+			// und aus ListofCard entfernen
 			ArrayList<ICard> tmpAgeIICards = new ArrayList<ICard>();
-			for(int i= 0; i < game.getListOfCards().size();i++) {
-				//Karten in tmpCardList speicher welche ins erste Zeitalter gehören
-				if(game.getListOfCards().get(i).getAge()==Age.AgeII) {
-					tmpAgeIICards.add(game.getListOfCards().get(i));			
+			for (int i = 0; i < game.getListOfCards().size(); i++) {
+				// Karten in tmpCardList speicher welche ins erste Zeitalter gehören
+				if (game.getListOfCards().get(i).getAge() == Age.AgeII) {
+					tmpAgeIICards.add(game.getListOfCards().get(i));
 				}
 			}
-			
+
 			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
 			tmpAllPlayers.add(this.player);
 			tmpAllPlayers.addAll(opponents);
-			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo( o2.getName() ));
+			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo(o2.getName()));
 
 			Random random = new Random();
-			
-			for(IPlayer p : tmpAllPlayers) {
+
+			for (IPlayer p : tmpAllPlayers) {
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
-				for(int z=0; z<7; z++) {
-					//Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
-					tmpCardStack.add(tmpAgeIICards.get(random.nextInt(tmpAgeIICards.size()-1)));
-				}					
-				//Übergabe des Arrays mit den 7 Karten an den Spieler
+				for (int z = 0; z < 7; z++) {
+					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
+					tmpCardStack.add(tmpAgeIICards.get(random.nextInt(tmpAgeIICards.size() - 1)));
+				}
+				// Übergabe des Arrays mit den 7 Karten an den Spieler
 				p.setCardStack(tmpCardStack);
 
-				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zuweisen des neuen Stacks an '" + p.getName() + "'");
-				
+				logger.log(Level.INFO,
+						"Thread [" + this.player.getName() + "]: Zuweisen des neuen Stacks an '" + p.getName() + "'");
+
 				ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
 				tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
 
 				tmpNewRoundMessage.setPlayer(p);
 				game.sendMessageToPlayer(p, tmpNewRoundMessage);
 			}
-			
+
 			return;
 		}
-		
-		if(roundFinished) {
+
+		if (roundFinished) {
 			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Runde abgeschlossen");
-			
+
 			ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
 			tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
-			
-			ArrayList<ArrayList<ICard>> tmpCardStacks = new ArrayList<ArrayList<ICard>>();				
-			
+
+			ArrayList<ArrayList<ICard>> tmpCardStacks = new ArrayList<ArrayList<ICard>>();
+
 			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
 			tmpAllPlayers.add(this.player);
 			tmpAllPlayers.addAll(opponents);
-			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo( o2.getName() ));
-			
-			for(IPlayer p : tmpAllPlayers) {
-				tmpCardStacks.add((ArrayList<ICard>)p.getCardStack().clone());
+			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo(o2.getName()));
+
+			for (IPlayer p : tmpAllPlayers) {
+				tmpCardStacks.add((ArrayList<ICard>) p.getCardStack().clone());
 			}
-			
-			for(int i = 0; i < tmpAllPlayers.size(); i++) {
+
+			for (int i = 0; i < tmpAllPlayers.size(); i++) {
 				int tmpIndexToTakeCardsFrom = i + 1;
-				if(tmpIndexToTakeCardsFrom > tmpAllPlayers.size()-1) {
+				if (tmpIndexToTakeCardsFrom > tmpAllPlayers.size() - 1) {
 					tmpIndexToTakeCardsFrom = 0;
 				}
 
-				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Spieler '"+tmpAllPlayers.get(i).getName()+"' nimmt Karten von Spieler '"+tmpAllPlayers.get(tmpIndexToTakeCardsFrom).getName()+"'");
+				logger.log(Level.INFO,
+						"Thread [" + this.player.getName() + "]: Spieler '" + tmpAllPlayers.get(i).getName()
+								+ "' nimmt Karten von Spieler '" + tmpAllPlayers.get(tmpIndexToTakeCardsFrom).getName()
+								+ "'");
 				tmpAllPlayers.get(i).setCardStack(tmpCardStacks.get(tmpIndexToTakeCardsFrom));
 				tmpAllPlayers.get(i).setHasPlayedCard(false);
 				tmpNewRoundMessage.setPlayer(tmpAllPlayers.get(i));
