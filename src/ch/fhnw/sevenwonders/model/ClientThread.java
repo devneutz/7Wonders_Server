@@ -243,6 +243,7 @@ public class ClientThread extends Thread {
 			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.StartLobby);
 			ILobby tmpLobby = inMessage.getLobby();
 			IPlayer tmpPlayer = inMessage.getPlayer();
+			int countPlayers = 0;
 
 			// Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen
 			// und aus ListofCard entfernen
@@ -252,6 +253,50 @@ public class ClientThread extends Thread {
 				if (game.getListOfCards().get(i).getAge() == Age.AgeI) {
 					tmpCardList.add(game.getListOfCards().get(i));
 				}
+			}
+			
+			ArrayList<ICard> tmpCardListForSwitch = new ArrayList<ICard>();
+			switch(game.getPlayersForLobby(tmpLobby).size()) {
+			
+			case 3:
+				for(int i=0; i< tmpCardList.size(); i++) {
+					if(tmpCardList.get(i).getUsedStartingFrom() == 3) {
+						tmpCardListForSwitch.add(tmpCardList.get(i));
+					}
+				}
+				break;
+			
+			case 4:
+				for(int i=0; i< tmpCardList.size(); i++) {
+					if(tmpCardList.get(i).getUsedStartingFrom() <= 4) {
+						tmpCardListForSwitch.add(tmpCardList.get(i));
+					}
+				}
+				break;
+				
+			case 5:
+				for(int i=0; i< tmpCardList.size(); i++) {
+					if(tmpCardList.get(i).getUsedStartingFrom() <= 5) {
+						tmpCardListForSwitch.add(tmpCardList.get(i));
+					}
+				}
+				break;
+				
+			case 6:
+				for(int i=0; i< tmpCardList.size(); i++) {
+					if(tmpCardList.get(i).getUsedStartingFrom() <= 6) {
+						tmpCardListForSwitch.add(tmpCardList.get(i));
+					}
+				}
+				break;
+				
+			case 7:
+				for(int i=0; i< tmpCardList.size(); i++) {
+					if(tmpCardList.get(i).getUsedStartingFrom() <= 7) {
+						tmpCardListForSwitch.add(tmpCardList.get(i));
+					}
+				}
+				break;
 			}
 
 			Random random = new Random();
@@ -265,7 +310,7 @@ public class ClientThread extends Thread {
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 				for (int z = 0; z < 7; z++) {
 					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
-					tmpCardStack.add(tmpCardList.get(random.nextInt(tmpCardList.size() - 1)));
+					tmpCardStack.add(tmpCardListForSwitch.get(random.nextInt(tmpCardListForSwitch.size() - 1)));
 				}
 				// Übergabe des Arrays mit den 7 Karten an den Spieler
 				c.getPlayer().setCardStack(tmpCardStack);
