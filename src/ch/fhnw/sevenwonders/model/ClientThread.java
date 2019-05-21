@@ -41,7 +41,7 @@ public class ClientThread extends Thread {
 	private ObjectInputStream in;
 
 	/*
-	 * Konstruktur f�r den Clientthread
+	 * Konstruktur fuer den Clientthread
 	 */
 	public ClientThread(Socket inSocket, int inClientId, Game inGame) {
 		this.socket = inSocket;
@@ -224,8 +224,8 @@ public class ClientThread extends Thread {
 		}
 		case LeaveLobby: {
 			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.LeaveLobby);
-			// Zus�tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-			// anderen Spieler �ber die L�schung der Lobby Bescheid wissen.
+			// Zusaezlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+			// anderen Spieler ueber die Loeschung der Lobby Bescheid wissen.
 			ILobby tmpLobby = inMessage.getLobby();
 			IPlayer tmpPlayer = inMessage.getPlayer();
 			// tmpLobby.removePlayer(tmpPlayer);

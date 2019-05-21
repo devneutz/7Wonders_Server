@@ -24,6 +24,8 @@ public class DbHelper {
 	private static final Logger logger = Logger.getLogger("");
 
 	/*
+	 * @author Joel Neutzner
+	 * 
 	 * In dieser Methode wird die Datenbank initialisiert. Hierbei wird die Tabelle
 	 * "player" erstellt.
 	 */
@@ -49,6 +51,8 @@ public class DbHelper {
 	}
 
 	/*
+	 * @author Joel Neutzner
+	 * 
 	 * In dieser Methode wird geprüft ob das Passwort des übergebenen Spielers auch
 	 * mit dem Spielerpasswort welches in der DB abgelegt ist übereinstimmt.
 	 */
@@ -80,6 +84,8 @@ public class DbHelper {
 	}
 
 	/*
+	 * @author Gabriel de Castilho
+	 * 
 	 * In dieser Methode wird überprüft ob der übergebene Spieler bereits in der DB
 	 * vorhanden ist.
 	 */
@@ -112,6 +118,8 @@ public class DbHelper {
 	}
 
 	/*
+	 * @author Gabriel de Castilho
+	 * 
 	 * In dieser Methode wird der übergebene Spieler in die Datenbank eingefügt.
 	 */
 	public static void addPlayer(IPlayer inPlayer) {
