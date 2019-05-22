@@ -40,8 +40,8 @@ public class ClientThread extends Thread {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 
-	/*
-	 * Konstruktur fuer den Clientthread
+	/**
+	 * Konstruktor fuer den Clientthread
 	 */
 	public ClientThread(Socket inSocket, int inClientId, Game inGame) {
 		this.socket = inSocket;
@@ -76,9 +76,9 @@ public class ClientThread extends Thread {
 		}
 	}
 
-	/*
+	/**
 	 * In dieser Methode werden die eingehenden Client Messages verarbeitet. Anhand
-	 * der StartupAction wird entschieden wie mit der Message umgegangen wird.
+	 * der StartupAction wird entschieden, wie mit der Message umgegangen wird.
 	 */
 	private void handlingIncomingMessage(Message inMessage) throws IOException, InterruptedException {
 		out.reset();
@@ -327,7 +327,7 @@ public class ClientThread extends Thread {
 				tmpStartMessage.setOpponents(c.getOpponents());
 				c.sendMessage(tmpStartMessage);
 			}
-
+			
 			game.removeLobby(tmpLobby);
 			break;
 		}
@@ -411,7 +411,6 @@ public class ClientThread extends Thread {
 			sendMessage(tmpMessage);
 
 			tryFinishTurn();
-
 			break;
 		}
 
@@ -423,7 +422,8 @@ public class ClientThread extends Thread {
 				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
 				IBoard tmpBoard = ((ClientGameMessage) inMessage).getBoard();
-
+				//this.player.setHasPlayedCard(true);
+				
 				if (((ClientGameMessage) inMessage).getAction() == GameAction.BuildCard) {
 					tmpPlayer.useCardForBuilding(tmpCard);
 				}
@@ -431,11 +431,12 @@ public class ClientThread extends Thread {
 				inMessage.setCard(tmpCard);
 				inMessage.setBoard(tmpBoard);
 				sendMessage(inMessage);
+				
 				break;
-
 			}
 
 			return;
+		
 		case MonetizeCard: {
 			ServerGameMessage tmpMessage = new ServerGameMessage(GameAction.PlayCard);
 			ICard tmpCard = inMessage.getCard();
