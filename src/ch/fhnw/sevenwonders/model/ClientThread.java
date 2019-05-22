@@ -513,6 +513,50 @@ public class ClientThread extends Thread {
 			tmpAllPlayers.add(this.player);
 			tmpAllPlayers.addAll(opponents);
 			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo(o2.getName()));
+			
+			ArrayList<ICard> tmpCardListForSwitch = new ArrayList<ICard>();
+			switch(tmpAllPlayers.size()) {
+			
+			case 3:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() == 3) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+			
+			case 4:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 4) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+				
+			case 5:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 5) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+				
+			case 6:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 6) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+				
+			case 7:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 7) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+			}
 
 			Random random = new Random();
 
@@ -520,7 +564,7 @@ public class ClientThread extends Thread {
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 				for (int z = 0; z < 7; z++) {
 					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
-					tmpCardStack.add(tmpAgeIICards.get(random.nextInt(tmpAgeIICards.size() - 1)));
+					tmpCardStack.add(tmpCardListForSwitch.get(random.nextInt(tmpCardListForSwitch.size() - 1)));
 				}
 				// Übergabe des Arrays mit den 7 Karten an den Spieler
 				p.setCardStack(tmpCardStack);
