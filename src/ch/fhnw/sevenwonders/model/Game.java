@@ -129,17 +129,31 @@ public class Game extends Thread{
 			this.clients.remove(inClient);
 		}
 		
-		if (inClient.getPlayer().getLobby().getLobbyMaster().getName().equalsIgnoreCase(inClient.getPlayer().getName())) {
-			this.removeLobby(inClient.getPlayer().getLobby());
-			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
-			tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
-			broadcastMessage(tmpBroadcast);
-		}
-		
-		if(inClient.getPlayer().getLobby() != null) {
+		if(inClient.getPlayer().getLobby() != null) {		
+			if (inClient.getPlayer().getLobby().getLobbyMaster().getName().equals(inClient.getPlayer().getName())) {
+				this.removeLobby(inClient.getPlayer().getLobby());
+				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyDeleted);
+				tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
+				broadcastMessage(tmpBroadcast);
+				return;
+			}
+			IPlayer tmpPlayer = inClient.getPlayer();
+			ILobby tmpActualLobby = null;
+			// Existiert die Lobby ueberhaupt?
+			synchronized (getLobbies()) {
+				Iterator<ILobby> iter = getLobbies().iterator();
+				while (iter.hasNext()) {
+					ILobby L = iter.next();
+					if (L.getLobbyName().equals(tmpPlayer.getLobby().getLobbyName())) {
+						tmpActualLobby = L;
+						break;
+					}
+				}
+			}						
+			tmpActualLobby.removePlayer(tmpPlayer);
 			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
-			tmpBroadcast.setLobby(inClient.getPlayer().getLobby());
-			tmpBroadcast.setPlayer(inClient.getPlayer());
+			tmpBroadcast.setLobby(tmpActualLobby);
+			tmpBroadcast.setPlayer(tmpPlayer);
 			broadcastMessage(tmpBroadcast);
 		}
 	}
