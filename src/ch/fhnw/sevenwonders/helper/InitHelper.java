@@ -598,7 +598,7 @@ public class InitHelper {
 		tmpValue.add(ResourceType.GearWheel);
 		
 		tmpCardList.add(new Card("Laboratorium", Age.AgeII, CardType.ScientificStructures, 3, null, tmpValue, tmpCosts, false, "SS_Laboratorium_3.jpg"));
-		tmpCardList.add(new Card("Laboratorium", Age.AgeII, CardType.ScientificStructures, 5, null, tmpValue, tmpCosts, false, "SS_Laboratorium_6.jpg"));
+		tmpCardList.add(new Card("Laboratorium", Age.AgeII, CardType.ScientificStructures, 5, null, tmpValue, tmpCosts, false, "SS_Laboratorium_5.jpg"));
 		
 		tmpCosts.clear();
 		tmpValue.clear();
@@ -637,8 +637,8 @@ public class InitHelper {
 		tmpValue.add(ResourceType.MilitaryMight);
 		tmpValue.add(ResourceType.MilitaryMight);
 		
-		tmpCardList.add(new Card("Schiessplatz", Age.AgeII, CardType.MilitaryStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Mauern_3.jpg"));
-		tmpCardList.add(new Card("Schiessplatz", Age.AgeII, CardType.MilitaryStructures, 6, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Mauern_6.jpg"));
+		tmpCardList.add(new Card("Schiessplatz", Age.AgeII, CardType.MilitaryStructures, 3, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Schiessplatz_3.jpg"));
+		tmpCardList.add(new Card("Schiessplatz", Age.AgeII, CardType.MilitaryStructures, 6, ValueCalculationType.And, tmpValue, tmpCosts, false, "MS_Schiessplatz_6.jpg"));
 		
 		tmpCosts.clear();
 		tmpValue.clear();
