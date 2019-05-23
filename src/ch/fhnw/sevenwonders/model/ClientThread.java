@@ -547,11 +547,6 @@ public class ClientThread extends Thread {
 					tmpAgeIICards.add(game.getListOfCards().get(i));
 				}
 			}
-
-			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
-			tmpAllPlayers.add(this.player);
-			tmpAllPlayers.addAll(opponents);
-			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo(o2.getName()));
 			
 			ArrayList<ICard> tmpCardListForSwitch = new ArrayList<ICard>();
 			switch(tmpAllPlayers.size()) {
