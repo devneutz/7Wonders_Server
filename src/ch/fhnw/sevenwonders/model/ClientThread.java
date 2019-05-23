@@ -305,8 +305,9 @@ public class ClientThread extends Thread {
 			}
 
 			for (ClientThread c : game.getPlayersForLobby(tmpLobby)) {
-				c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
-
+				//c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
+				c.getPlayer().setBoard(game.getListOfBoards().stream().filter(inBoard -> inBoard.getName().equals("Gizah A")).findAny().orElse(null));
+				
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 				for (int z = 0; z < 7; z++) {
 					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
@@ -415,23 +416,21 @@ public class ClientThread extends Thread {
 		}
 
 		case BuildCard:
-			// What board does the player have? What stages have already been built? -> try
-			// to build the next stage
-			int tmpStageToBuild = inMessage.getPlayer().getBoard().getNextStageToBuild();
 			if (inMessage.getPlayer().getBoard().canBuild(inMessage.getPlayer())) {
+				ServerGameMessage tmpMessage = new ServerGameMessage(GameAction.BuildCard);
+				
 				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
-				IBoard tmpBoard = ((ClientGameMessage) inMessage).getBoard();
-				//this.player.setHasPlayedCard(true);
 				
-				if (((ClientGameMessage) inMessage).getAction() == GameAction.BuildCard) {
-					tmpPlayer.useCardForBuilding(tmpCard);
-				}
-				inMessage.setPlayer(tmpPlayer);
-				inMessage.setCard(tmpCard);
-				inMessage.setBoard(tmpBoard);
-				sendMessage(inMessage);
+				this.player.setHasPlayedCard(true);
 				
+				tmpPlayer.useCardForBuilding(tmpCard);
+				
+				tmpMessage.setPlayer(this.player);
+				tmpMessage.setCard(tmpCard);
+				sendMessage(tmpMessage);
+
+				tryFinishTurn();
 				break;
 			}
 
@@ -522,13 +521,18 @@ public class ClientThread extends Thread {
 							+ "Vergleiche Kriegspunkte mit Spieler links [" + tmpAllPlayers.get(tmpEvaluationIndexLeft).getName() +"("+tmpAllPlayers.get(tmpEvaluationIndexLeft).getMilitaryPoints()+")] "
 									+ "und Spieler rechts ["+tmpAllPlayers.get(tmpEvaluationIndexRight).getName() +"("+tmpAllPlayers.get(tmpEvaluationIndexRight).getMilitaryPoints()+")]");
 					
-					tmpAllPlayers.get(i).militaryConflict(tmpAllPlayers.get(tmpEvaluationIndexLeft), tmpAllPlayers.get(tmpEvaluationIndexRight), Age.AgeII);
-					
+					tmpAllPlayers.get(i).militaryConflict(tmpAllPlayers.get(tmpEvaluationIndexLeft), tmpAllPlayers.get(tmpEvaluationIndexRight), Age.AgeII);					
+				}
+				
+				for(IPlayer p : tmpAllPlayers) {
 					ServerEvaluationMessage tmpEvaluationMessage = new ServerEvaluationMessage(GameAction.Evaluation);
 					tmpEvaluationMessage.setStatusCode(StatusCode.Success);					
 
-					tmpEvaluationMessage.setPlayer(tmpAllPlayers.get(i));
-					game.sendMessageToPlayer(tmpAllPlayers.get(i), tmpEvaluationMessage);
+					tmpEvaluationMessage.setPlayer(p);
+					ArrayList<IPlayer> tmpOpponents = (ArrayList<IPlayer>)tmpAllPlayers.clone();
+					tmpOpponents.remove(this.player);
+					tmpEvaluationMessage.setOpponents(tmpOpponents);
+					game.sendMessageToPlayer(p, tmpEvaluationMessage);
 				}
 
 				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Auswertung des Spiels abgeschlossen.");
