@@ -8,9 +8,11 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import ch.fhnw.sevenwonders.enums.*;
 import ch.fhnw.sevenwonders.interfaces.*;
@@ -256,83 +258,39 @@ public class ClientThread extends Thread {
 
 		}
 		case StartLobby: {
-			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.StartLobby);
 			ILobby tmpLobby = inMessage.getLobby();
-			IPlayer tmpPlayer = inMessage.getPlayer();
-			int countPlayers = 0;
-
-			// Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen
-			// und aus ListofCard entfernen
-			ArrayList<ICard> tmpCardList = new ArrayList<ICard>();
-			for (int i = 0; i < game.getListOfCards().size(); i++) {
-				// Karten in tmpCardList speicher welche ins erste Zeitalter gehören
-				if (game.getListOfCards().get(i).getAge() == Age.AgeI) {
-					tmpCardList.add(game.getListOfCards().get(i));
-				}
-			}
+			ArrayList<ClientThread> cPlayersinLobby = game.getPlayersForLobby(tmpLobby);
 			
-			ArrayList<ICard> tmpCardListForSwitch = new ArrayList<ICard>();
-			switch(game.getPlayersForLobby(tmpLobby).size()) {
+			// Karten des entsprechenden Zeitalters holen
+			ArrayList<ICard> tmpCardList = 
+					new ArrayList<ICard>(game.getListOfCards().stream().filter(inc -> inc.getUsedStartingFrom() <= cPlayersinLobby.size() && inc.getAge() == Age.AgeI).collect(Collectors.toList()));
 			
-			case 3:
-				for(int i=0; i< tmpCardList.size(); i++) {
-					if(tmpCardList.get(i).getUsedStartingFrom() == 3) {
-						tmpCardListForSwitch.add(tmpCardList.get(i));
-					}
-				}
-				break;
-			
-			case 4:
-				for(int i=0; i< tmpCardList.size(); i++) {
-					if(tmpCardList.get(i).getUsedStartingFrom() <= 4) {
-						tmpCardListForSwitch.add(tmpCardList.get(i));
-					}
-				}
-				break;
-				
-			case 5:
-				for(int i=0; i< tmpCardList.size(); i++) {
-					if(tmpCardList.get(i).getUsedStartingFrom() <= 5) {
-						tmpCardListForSwitch.add(tmpCardList.get(i));
-					}
-				}
-				break;
-				
-			case 6:
-				for(int i=0; i< tmpCardList.size(); i++) {
-					if(tmpCardList.get(i).getUsedStartingFrom() <= 6) {
-						tmpCardListForSwitch.add(tmpCardList.get(i));
-					}
-				}
-				break;
-				
-			case 7:
-				for(int i=0; i< tmpCardList.size(); i++) {
-					if(tmpCardList.get(i).getUsedStartingFrom() <= 7) {
-						tmpCardListForSwitch.add(tmpCardList.get(i));
-					}
-				}
-				break;
-			}
+			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zusammenstellen der Karten fürs erste Zeitalter vollständig! Anzahl Karten: ["+tmpCardList.size()+"]");
 
 			Random random = new Random();
-			for (ClientThread c : game.getPlayersForLobby(tmpLobby)) {
+			for (ClientThread c : cPlayersinLobby) {
 				this.addOpponent(c.getPlayer());
 			}
 
-			for (ClientThread c : game.getPlayersForLobby(tmpLobby)) {
+			for (ClientThread c : cPlayersinLobby) {
 				//c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
 				c.getPlayer().setBoard(game.getListOfBoards().stream().filter(inBoard -> inBoard.getName().equals("Gizah A")).findAny().orElse(null));
 				
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 				for (int z = 0; z < 7; z++) {
 					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
-					tmpCardStack.add(tmpCardListForSwitch.get(random.nextInt(tmpCardListForSwitch.size() - 1)));
+					int tmpBound = tmpCardList.size() - 1;
+					if(tmpBound == 0) {
+						tmpBound = 1;
+					}
+					ICard tmpCardToRemove = tmpCardList.get(random.nextInt(tmpBound));
+					tmpCardStack.add(tmpCardToRemove);
+					tmpCardList.remove(tmpCardToRemove);
 				}
 				// Übergabe des Arrays mit den 7 Karten an den Spieler
 				c.getPlayer().setCardStack(tmpCardStack);
 				if (!c.getPlayer().getName().equals(this.getPlayer().getName())) {
-					for (ClientThread x : game.getPlayersForLobby(tmpLobby)) {
+					for (ClientThread x : cPlayersinLobby) {
 						c.addOpponent(x.getPlayer());
 					}
 				}
@@ -561,64 +519,24 @@ public class ClientThread extends Thread {
 			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Verteilen von neuen Karten-Stacks");
 			// Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen
 			// und aus ListofCard entfernen
-			ArrayList<ICard> tmpAgeIICards = new ArrayList<ICard>();
-			for (int i = 0; i < game.getListOfCards().size(); i++) {
-				// Karten in tmpCardList speicher welche ins erste Zeitalter gehören
-				if (game.getListOfCards().get(i).getAge() == Age.AgeII) {
-					tmpAgeIICards.add(game.getListOfCards().get(i));
-				}
-			}
+			ArrayList<ICard> tmpAgeIICards = new ArrayList<ICard>(game.getListOfCards()
+					.stream()
+					.filter(inc -> inc.getUsedStartingFrom() <= tmpAllPlayers.size() && inc.getAge() == Age.AgeI)
+					.collect(Collectors.toList()));
 			
-			ArrayList<ICard> tmpCardListForSwitch = new ArrayList<ICard>();
-			switch(tmpAllPlayers.size()) {
-			
-			case 3:
-				for(int i=0; i< tmpAgeIICards.size(); i++) {
-					if(tmpAgeIICards.get(i).getUsedStartingFrom() == 3) {
-						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
-					}
-				}
-				break;
-			
-			case 4:
-				for(int i=0; i< tmpAgeIICards.size(); i++) {
-					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 4) {
-						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
-					}
-				}
-				break;
-				
-			case 5:
-				for(int i=0; i< tmpAgeIICards.size(); i++) {
-					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 5) {
-						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
-					}
-				}
-				break;
-				
-			case 6:
-				for(int i=0; i< tmpAgeIICards.size(); i++) {
-					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 6) {
-						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
-					}
-				}
-				break;
-				
-			case 7:
-				for(int i=0; i< tmpAgeIICards.size(); i++) {
-					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 7) {
-						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
-					}
-				}
-				break;
-			}
 			Random random = new Random();
 
 			for (IPlayer p : tmpAllPlayers) {
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 				for (int z = 0; z < 7; z++) {
 					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
-					tmpCardStack.add(tmpCardListForSwitch.get(random.nextInt(tmpCardListForSwitch.size() - 1)));
+					int tmpBound = tmpAgeIICards.size() - 1;
+					if(tmpBound == 0) {
+						tmpBound = 1;
+					}
+					ICard tmpCardToRemove = tmpAgeIICards.get(random.nextInt(tmpBound));
+					tmpCardStack.add(tmpCardToRemove);
+					tmpAgeIICards.remove(tmpCardToRemove);
 				}
 				// Übergabe des Arrays mit den 7 Karten an den Spieler
 				p.setCardStack(tmpCardStack);
