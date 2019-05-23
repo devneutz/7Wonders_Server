@@ -40,8 +40,8 @@ public class ClientThread extends Thread {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 
-	/*
-	 * Konstruktur fuer den Clientthread
+	/**
+	 * Konstruktor fuer den Clientthread
 	 */
 	public ClientThread(Socket inSocket, int inClientId, Game inGame) {
 		this.socket = inSocket;
@@ -76,9 +76,9 @@ public class ClientThread extends Thread {
 		}
 	}
 
-	/*
+	/**
 	 * In dieser Methode werden die eingehenden Client Messages verarbeitet. Anhand
-	 * der StartupAction wird entschieden wie mit der Message umgegangen wird.
+	 * der StartupAction wird entschieden, wie mit der Message umgegangen wird.
 	 */
 	private void handlingIncomingMessage(Message inMessage) throws IOException, InterruptedException {
 		out.reset();
@@ -327,7 +327,7 @@ public class ClientThread extends Thread {
 				tmpStartMessage.setOpponents(c.getOpponents());
 				c.sendMessage(tmpStartMessage);
 			}
-
+			
 			game.removeLobby(tmpLobby);
 			break;
 		}
@@ -411,7 +411,6 @@ public class ClientThread extends Thread {
 			sendMessage(tmpMessage);
 
 			tryFinishTurn();
-
 			break;
 		}
 
@@ -423,7 +422,8 @@ public class ClientThread extends Thread {
 				IPlayer tmpPlayer = ((ClientGameMessage) inMessage).getPlayer();
 				ICard tmpCard = ((ClientGameMessage) inMessage).getCard();
 				IBoard tmpBoard = ((ClientGameMessage) inMessage).getBoard();
-
+				//this.player.setHasPlayedCard(true);
+				
 				if (((ClientGameMessage) inMessage).getAction() == GameAction.BuildCard) {
 					tmpPlayer.useCardForBuilding(tmpCard);
 				}
@@ -431,11 +431,12 @@ public class ClientThread extends Thread {
 				inMessage.setCard(tmpCard);
 				inMessage.setBoard(tmpBoard);
 				sendMessage(inMessage);
+				
 				break;
-
 			}
 
 			return;
+		
 		case MonetizeCard: {
 			ServerGameMessage tmpMessage = new ServerGameMessage(GameAction.PlayCard);
 			ICard tmpCard = inMessage.getCard();
@@ -546,14 +547,62 @@ public class ClientThread extends Thread {
 					tmpAgeIICards.add(game.getListOfCards().get(i));
 				}
 			}
-		
+
+			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
+			tmpAllPlayers.add(this.player);
+			tmpAllPlayers.addAll(opponents);
+			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo(o2.getName()));
+			
+			ArrayList<ICard> tmpCardListForSwitch = new ArrayList<ICard>();
+			switch(tmpAllPlayers.size()) {
+			
+			case 3:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() == 3) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+			
+			case 4:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 4) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+				
+			case 5:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 5) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+				
+			case 6:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 6) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+				
+			case 7:
+				for(int i=0; i< tmpAgeIICards.size(); i++) {
+					if(tmpAgeIICards.get(i).getUsedStartingFrom() <= 7) {
+						tmpCardListForSwitch.add(tmpAgeIICards.get(i));
+					}
+				}
+				break;
+			}
 			Random random = new Random();
 
 			for (IPlayer p : tmpAllPlayers) {
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 				for (int z = 0; z < 7; z++) {
 					// Zufällige Zuweisung der 7 Karten an die tmpCardListForPlayer
-					tmpCardStack.add(tmpAgeIICards.get(random.nextInt(tmpAgeIICards.size() - 1)));
+					tmpCardStack.add(tmpCardListForSwitch.get(random.nextInt(tmpCardListForSwitch.size() - 1)));
 				}
 				// Übergabe des Arrays mit den 7 Karten an den Spieler
 				p.setCardStack(tmpCardStack);
