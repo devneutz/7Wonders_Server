@@ -84,7 +84,7 @@ public class ClientThread extends Thread {
 	}
 
 	/**
-	 * Verwalten aller einkommenden Nachrichten anhand des Typs
+	 * Verwalten aller einkommenden Nachrichten anhand des Typs der Message
 	 * @author Gabriel de Castilho
 	 */
 	private void handlingIncomingMessage(Message inMessage) throws IOException, InterruptedException {
@@ -101,9 +101,6 @@ public class ClientThread extends Thread {
 
 	/**
 	 * Alle Login- oder Registrierungsnachrichten verwalten
-	 * @param inMessage
-	 * @throws IOException
-	 * @throws InterruptedException
 	 * @author Gabriel de Castilho
 	 */
 	private void handleStartupMessages(ClientStartupMessage inMessage) throws IOException, InterruptedException {
@@ -384,7 +381,7 @@ public class ClientThread extends Thread {
 
 				tmpMessage.setStatusCode(StatusCode.Success);
 				sendMessage(tmpMessage);
-				// Zusï¿½tzlich zur Antwort an den Beitretende einen Broadcast absetzen, damit
+				// Zusaetzlich zur Antwort an den Beitretende einen Broadcast absetzen, damit
 				// die
 				// andere Spieler über den neuen Spieler Bescheid wissen.
 				ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerJoined);

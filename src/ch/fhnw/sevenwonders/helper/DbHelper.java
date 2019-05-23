@@ -23,7 +23,7 @@ public class DbHelper {
 
 	private static final Logger logger = Logger.getLogger("");
 
-	/*
+	/**
 	 * @author Joel Neutzner
 	 * 
 	 * In dieser Methode wird die Datenbank initialisiert. Hierbei wird die Tabelle
@@ -50,7 +50,7 @@ public class DbHelper {
 		}
 	}
 
-	/*
+	/**
 	 * @author Joel Neutzner
 	 * 
 	 * In dieser Methode wird geprüft ob das Passwort des übergebenen Spielers auch
@@ -83,7 +83,7 @@ public class DbHelper {
 		return false;
 	}
 
-	/*
+	/**
 	 * @author Gabriel de Castilho
 	 * 
 	 * In dieser Methode wird überprüft ob der übergebene Spieler bereits in der DB
@@ -117,7 +117,7 @@ public class DbHelper {
 
 	}
 
-	/*
+	/**
 	 * @author Gabriel de Castilho
 	 * 
 	 * In dieser Methode wird der übergebene Spieler in die Datenbank eingefügt.
