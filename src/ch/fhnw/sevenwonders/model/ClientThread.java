@@ -8,7 +8,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +34,6 @@ public class ClientThread extends Thread {
 	private final Logger logger = Logger.getLogger("");
 
 	private final int clientId;
-	private static volatile int guestCounter = 0;
 
 	private final Game game;
 
@@ -51,6 +49,8 @@ public class ClientThread extends Thread {
 		this.game = inGame;
 		try {
 			this.opponents = new ArrayList<IPlayer>();
+			
+			// Initialisieren des In- und OutputStreams
 			this.out = new ObjectOutputStream(socket.getOutputStream());
 			this.in = new ObjectInputStream(socket.getInputStream());
 
@@ -60,6 +60,9 @@ public class ClientThread extends Thread {
 		}
 	}
 
+	/**
+	 * Handling für alle einkommenden Nachrichten in einer Endlosschleife
+	 */
 	@Override
 	public void run() {
 		try {
@@ -70,6 +73,7 @@ public class ClientThread extends Thread {
 				}
 			}
 		} catch (SocketException inEx) {
+			// Schliesst der Client unerwartet die Verbindung, entfernen wir den Spieler vom Server
 			game.removeClient(this);
 			logger.log(Level.INFO, "Client disconnected [Client " + clientId + "]");
 		} catch (EOFException inEOFEx) {
@@ -79,10 +83,11 @@ public class ClientThread extends Thread {
 	}
 
 	/**
-	 * In dieser Methode werden die eingehenden Client Messages verarbeitet. Anhand
-	 * der StartupAction wird entschieden, wie mit der Message umgegangen wird.
+	 * Verwalten aller einkommenden Nachrichten anhand des Typs
+	 * @author Gabriel de Castilho
 	 */
 	private void handlingIncomingMessage(Message inMessage) throws IOException, InterruptedException {
+		// OutputStream zurücksetzen, damit auch ja nichts gecacht wird.
 		out.reset();
 		if (inMessage instanceof ClientStartupMessage) {
 			handleStartupMessages((ClientStartupMessage) inMessage);
@@ -93,77 +98,100 @@ public class ClientThread extends Thread {
 		}
 	}
 
+	/**
+	 * Alle Login- oder Registrierungsnachrichten verwalten
+	 * @param inMessage
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @author Gabriel de Castilho
+	 */
 	private void handleStartupMessages(ClientStartupMessage inMessage) throws IOException, InterruptedException {
-		logger.log(Level.INFO, "Message received [Client " + clientId + "] - ClientStartupMessage");
+		logger.log(Level.INFO, "Thread [Client " + clientId + "] - Start-Nachricht erhalten");
 		ServerStartupMessage tmpMessage = new ServerStartupMessage(inMessage.getActionType());
 		IPlayer tmpPlayer = inMessage.getPlayer();
-
+		
+		// Handelt es sich um ein Login?
 		if (inMessage.getActionType() == StartupAction.Login) {
-
+			// Datenbanküberprüfung ob Spieler überhaupt registriert ist
 			if (DbHelper.doesPlayerExist(tmpPlayer)) {
-
+				// Passwort-Validierung
 				if (DbHelper.isPasswordValid(tmpPlayer)) {
+					// Erfolgreich validiert - Spieler einloggen
 					this.player = tmpPlayer;
 					tmpMessage.setPlayer(this.player);
 					tmpMessage.setLobbies(game.getLobbies());
 					tmpMessage.setStatusCode(StatusCode.Success);
-					logger.log(Level.INFO,
-							"Player logged in successfully [Client " + clientId + "] - ClientStartupMessage");
+					logger.log(Level.INFO,"Thread [Client " + clientId + "] - Login als [" + this.player.getName() +"] erfolgreich");
+					logger.log(Level.INFO,"Thread [" + this.player.getName() + "] - hat sich eingeloggt");
 					sendMessage(tmpMessage);
 					return;
 				} else {
+					// Login nicht erfolgreich! Zurückmelden!
 					tmpMessage.setStatusCode(StatusCode.LoginFailed);
 					logger.log(Level.WARNING,
-							"Player typed wrong password [Client " + clientId + "] - ClientStartupMessage");
+							"Thread [Client " + clientId + "] - Falsches Passwort für Spieler ["+ tmpPlayer.getName() +"]!");
 					sendMessage(tmpMessage);
 					return;
 				}
 
 			} else {
+				// Login nicht erfolgreich! Zurückmelden!
 				tmpMessage.setStatusCode(StatusCode.LoginFailed);
 				logger.log(Level.WARNING,
-						"Player doesn't exists in db [Client " + clientId + "] - ClientStartupMessage");
+						"Thread [Client " + clientId + "] - Spieler ["+ tmpPlayer.getName() +"] existiert nicht!");
 				sendMessage(tmpMessage);
 				return;
 			}
 		}
 
+		// Handelt es sich um eine Registrierungs-Nachricht?
 		if (inMessage.getActionType() == StartupAction.Register) {
+			// Validierung ob Benutzer bereits existiert
 			if (DbHelper.doesPlayerExist(tmpPlayer)) {
 				tmpMessage.setStatusCode(StatusCode.RegistrationFailed);
 				logger.log(Level.WARNING,
-						"Player already exists in db [Client " + clientId + "] - ClientStartupMessage");
+						"Thread [Client " + clientId + "] - Spieler ["+ tmpPlayer.getName() +"] existiert bereits!");
 				sendMessage(tmpMessage);
 				return;
 			} else {
+				// Speichern des Spielers in die Datenbank
 				DbHelper.addPlayer(tmpPlayer);
 				this.player = tmpPlayer;
 				tmpMessage.setPlayer(this.player);
 				tmpMessage.setLobbies(game.getLobbies());
 				tmpMessage.setStatusCode(StatusCode.Success);
 				logger.log(Level.INFO,
-						"Player logged in successfully [Client " + clientId + "] - ClientStartupMessage");
+						"Thread [Client " + clientId + "] - Registrierungsvorgang für ["+ this.player.getName() +"] erfolgreich! Automatisches Login");
 				sendMessage(tmpMessage);
 				return;
 			}
-		} else if (inMessage.getActionType() == StartupAction.LoginAsGuest) {
+		}
+		// Login als Gast, keine Validierungen - Zuweisung eines Gäste-Namens
+		else if (inMessage.getActionType() == StartupAction.LoginAsGuest) {
 			Player guestPlayer = new Player();
 			synchronized (this) {
-				guestCounter++;
+				Game.guestCounter++;
 			}
-			guestPlayer.setName("Guest " + guestCounter);
+			guestPlayer.setName("Guest " + Game.guestCounter);
 			tmpMessage.setPlayer(guestPlayer);
 
 			this.player = guestPlayer;
 
 			tmpMessage.setLobbies(game.getLobbies());
 			tmpMessage.setStatusCode(StatusCode.Success);
-			logger.log(Level.INFO, "Guest logged in successfully [Client " + clientId + "] - ClientStartupMessage");
+			logger.log(Level.INFO, "Thread [Client " + clientId + "] - [Gästelogin] Erfolgreich als ["+ this.player.getName() +"] eingeloggt");
 			sendMessage(tmpMessage);
 			return;
 		}
 	}
 
+	/**
+	 * Verwalten aller Anfragen welche eine Lobby betreffen
+	 * @param inMessage
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @author joeln
+	 */
 	private void handleLobbyMessages(ClientLobbyMessage inMessage) throws IOException, InterruptedException {
 		switch (inMessage.getActionType()) {
 		case CreateLobby: {
@@ -198,8 +226,8 @@ public class ClientThread extends Thread {
 			tmpMessage.setPlayer(tmpPlayer);
 			tmpMessage.setStatusCode(StatusCode.Success);
 			sendMessage(tmpMessage);
-			// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-			// anderen Spieler ï¿½ber die neue Lobby Bescheid wissen.
+			// Zusaetzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+			// anderen Spieler ueber die neue Lobby Bescheid wissen.
 			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.LobbyCreated);
 			tmpBroadcast.setLobby(tmpLobby);
 			game.broadcastMessage(tmpBroadcast);
@@ -207,8 +235,8 @@ public class ClientThread extends Thread {
 		}
 		case DeleteLobby: {
 			ServerLobbyMessage tmpMessage = new ServerLobbyMessage(LobbyAction.DeleteLobby);
-			// Zusï¿½tzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
-			// anderen Spieler ï¿½ber die Lï¿½schung der Lobby Bescheid wissen.
+			// Zusaetzlich zur Antwort an den Ersteller einen Broadcast absetzen, damit die
+			// anderen Spieler ueber die Loeschung der Lobby Bescheid wissen.
 			ILobby tmpLobby = inMessage.getLobby();
 			IPlayer tmpPlayer = inMessage.getPlayer();
 			if (tmpLobby.getLobbyMaster().getName().equalsIgnoreCase(tmpPlayer.getName())) {
@@ -273,7 +301,9 @@ public class ClientThread extends Thread {
 			}
 
 			for (ClientThread c : cPlayersinLobby) {
+				// Erweiterungsmöglichkeit - Boards zufaellig verteilen
 				//c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
+				
 				c.getPlayer().setBoard(game.getListOfBoards().stream().filter(inBoard -> inBoard.getName().equals("Gizah A")).findAny().orElse(null));
 				
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();

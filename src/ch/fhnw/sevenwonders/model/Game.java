@@ -32,8 +32,9 @@ public class Game extends Thread{
 	private ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	private List<ILobby> lobbies;
 	
-	// Statischer Gäste-Counter
+	// Statischer Client-Counter
 	private static int clientId = 1;
+	public static volatile int guestCounter = 0;
 	
 	private ArrayList<ICard> listOfAllCards = new ArrayList<ICard>();
 	private ArrayList<IBoard> listOfAllBoards = new ArrayList<IBoard>();
