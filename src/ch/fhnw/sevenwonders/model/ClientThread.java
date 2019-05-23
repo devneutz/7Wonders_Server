@@ -496,7 +496,45 @@ public class ClientThread extends Thread {
 		boolean ageFinished = this.player.getCardStack().size() == 1;
 
 		if (ageFinished) {
-			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zeitalter abgeschlossen");
+			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
+			tmpAllPlayers.add(this.player);
+			tmpAllPlayers.addAll(opponents);
+			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo(o2.getName()));
+
+			// Ist bereits das zweite Zeitalter abgeschlossen?
+			if(this.player.getCardStack().get(0).getAge() == Age.AgeII) {
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zweites Zeitalter abgeschlossen");
+				
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Evaluation der Kriegspunkte!");
+				for (int i = 0; i < tmpAllPlayers.size(); i++) {
+					int tmpEvaluationIndexLeft = i-1;
+					int tmpEvaluationIndexRight = i + 1;
+					
+					// Linker Spieler nicht vorhanden -> gehe im Kreis zum letzten
+					if(tmpEvaluationIndexLeft < 0) {
+						tmpEvaluationIndexLeft = tmpAllPlayers.size() -1;
+					}else if(tmpEvaluationIndexRight > tmpAllPlayers.size() -1) {
+						tmpEvaluationIndexRight = 0;
+					}					
+
+					logger.log(Level.INFO, "Thread [" + tmpAllPlayers.get(i).getName() + "]: "
+							+ "Vergleiche Kriegspunkte mit Spieler links [" + tmpAllPlayers.get(tmpEvaluationIndexLeft).getName() +"("+tmpAllPlayers.get(tmpEvaluationIndexLeft).getMilitaryPoints()+")] "
+									+ "und Spieler rechts ["+tmpAllPlayers.get(tmpEvaluationIndexRight).getName() +"("+tmpAllPlayers.get(tmpEvaluationIndexRight).getMilitaryPoints()+")]");
+					
+					tmpAllPlayers.get(i).militaryConflict(tmpAllPlayers.get(tmpEvaluationIndexLeft), tmpAllPlayers.get(tmpEvaluationIndexRight), Age.AgeII);
+					
+					ServerEvaluationMessage tmpEvaluationMessage = new ServerEvaluationMessage(GameAction.Evaluation);
+					tmpEvaluationMessage.setStatusCode(StatusCode.Success);					
+
+					tmpEvaluationMessage.setPlayer(tmpAllPlayers.get(i));
+					game.sendMessageToPlayer(tmpAllPlayers.get(i), tmpEvaluationMessage);
+				}
+
+				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Auswertung des Spiels abgeschlossen.");
+				return;
+			}
+			
+			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Erstes Zeitalter abgeschlossen");
 
 			logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Verteilen von neuen Karten-Stacks");
 			// Zufällig Karten aus erstem Zeitalter für erste Runde den Spielern zuweisen
@@ -508,12 +546,7 @@ public class ClientThread extends Thread {
 					tmpAgeIICards.add(game.getListOfCards().get(i));
 				}
 			}
-
-			ArrayList<IPlayer> tmpAllPlayers = new ArrayList<IPlayer>();
-			tmpAllPlayers.add(this.player);
-			tmpAllPlayers.addAll(opponents);
-			tmpAllPlayers.sort((IPlayer o1, IPlayer o2) -> o1.getName().compareTo(o2.getName()));
-
+		
 			Random random = new Random();
 
 			for (IPlayer p : tmpAllPlayers) {
@@ -524,9 +557,9 @@ public class ClientThread extends Thread {
 				}
 				// Übergabe des Arrays mit den 7 Karten an den Spieler
 				p.setCardStack(tmpCardStack);
-
+				p.setHasPlayedCard(false);
 				logger.log(Level.INFO,
-						"Thread [" + this.player.getName() + "]: Zuweisen des neuen Stacks an '" + p.getName() + "'");
+						"Thread [" + p.getName() + "]: Zuweisen des neuen Stacks an '" + p.getName() + "'");
 
 				ServerGameMessage tmpNewRoundMessage = new ServerGameMessage(GameAction.PlayCard);
 				tmpNewRoundMessage.setStatusCode(StatusCode.NewRound);
@@ -562,7 +595,7 @@ public class ClientThread extends Thread {
 				}
 
 				logger.log(Level.INFO,
-						"Thread [" + this.player.getName() + "]: Spieler '" + tmpAllPlayers.get(i).getName()
+						"Thread [" + tmpAllPlayers.get(i).getName() + "]: Spieler '" + tmpAllPlayers.get(i).getName()
 								+ "' nimmt Karten von Spieler '" + tmpAllPlayers.get(tmpIndexToTakeCardsFrom).getName()
 								+ "'");
 				tmpAllPlayers.get(i).setCardStack(tmpCardStacks.get(tmpIndexToTakeCardsFrom));
