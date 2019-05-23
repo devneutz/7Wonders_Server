@@ -506,6 +506,7 @@ public class ClientThread extends Thread {
 				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Zweites Zeitalter abgeschlossen");
 				
 				logger.log(Level.INFO, "Thread [" + this.player.getName() + "]: Evaluation der Kriegspunkte!");
+				
 				for (int i = 0; i < tmpAllPlayers.size(); i++) {
 					int tmpEvaluationIndexLeft = i-1;
 					int tmpEvaluationIndexRight = i + 1;
@@ -530,7 +531,7 @@ public class ClientThread extends Thread {
 
 					tmpEvaluationMessage.setPlayer(p);
 					ArrayList<IPlayer> tmpOpponents = (ArrayList<IPlayer>)tmpAllPlayers.clone();
-					tmpOpponents.remove(this.player);
+					tmpOpponents.remove(p);
 					tmpEvaluationMessage.setOpponents(tmpOpponents);
 					game.sendMessageToPlayer(p, tmpEvaluationMessage);
 				}
