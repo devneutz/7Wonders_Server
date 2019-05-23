@@ -228,13 +228,29 @@ public class ClientThread extends Thread {
 			// anderen Spieler ueber die Loeschung der Lobby Bescheid wissen.
 			ILobby tmpLobby = inMessage.getLobby();
 			IPlayer tmpPlayer = inMessage.getPlayer();
-			// tmpLobby.removePlayer(tmpPlayer);
+			ILobby tmpActualLobby = null;
+			// Existiert die Lobby ueberhaupt?
+			synchronized (game.getLobbies()) {
+				Iterator<ILobby> iter = game.getLobbies().iterator();
+				while (iter.hasNext()) {
+					ILobby L = iter.next();
+					if (L.getLobbyName().equals(tmpLobby.getLobbyName())) {
+						tmpActualLobby = L;
+						break;
+					}
+				}
+			}
+						
+			tmpActualLobby.removePlayer(tmpPlayer);
+			
 			this.player.setLobby(null);
 			tmpMessage.setStatusCode(StatusCode.Success);
 			tmpMessage.setPlayer(this.player);
 			sendMessage(tmpMessage);
+			
 			ServerLobbyMessage tmpBroadcast = new ServerLobbyMessage(LobbyAction.PlayerLeft);
-			tmpBroadcast.setLobby(tmpLobby);
+			tmpBroadcast.setLobby(tmpActualLobby);
+			tmpBroadcast.setPlayer(this.player);
 			game.broadcastMessage(tmpBroadcast);
 			break;
 
