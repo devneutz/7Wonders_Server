@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import ch.fhnw.sevenwonders.enums.*;
 import ch.fhnw.sevenwonders.interfaces.*;
 import ch.fhnw.sevenwonders.messages.*;
+import ch.fhnw.sevenwonders.helper.CopyHelper;
 import ch.fhnw.sevenwonders.helper.DbHelper;
 import ch.fhnw.sevenwonders.models.Player;
 
@@ -303,8 +304,8 @@ public class ClientThread extends Thread {
 			for (ClientThread c : cPlayersinLobby) {
 				// Erweiterungsmöglichkeit - Boards zufaellig verteilen
 				//c.getPlayer().setBoard(game.getListOfBoards().get(random.nextInt(game.getListOfBoards().size())));
-				
-				c.getPlayer().setBoard(game.getListOfBoards().stream().filter(inBoard -> inBoard.getName().equals("Gizah A")).findAny().orElse(null));
+				IBoard tmpBoard = game.getListOfBoards().stream().filter(inBoard -> inBoard.getName().equals("Gizah A")).findAny().orElse(null);
+				c.getPlayer().setBoard(CopyHelper.copy(tmpBoard));
 				
 				ArrayList<ICard> tmpCardStack = new ArrayList<ICard>();
 				for (int z = 0; z < 7; z++) {
@@ -428,10 +429,11 @@ public class ClientThread extends Thread {
 				
 				this.player.setHasPlayedCard(true);
 				
-				tmpPlayer.useCardForBuilding(tmpCard);
+				this.player.useCardForBuilding(tmpCard);
 				
 				tmpMessage.setPlayer(this.player);
 				tmpMessage.setCard(tmpCard);
+				tmpMessage.setStatusCode(StatusCode.Success);
 				sendMessage(tmpMessage);
 
 				tryFinishTurn();
@@ -551,7 +553,7 @@ public class ClientThread extends Thread {
 			// und aus ListofCard entfernen
 			ArrayList<ICard> tmpAgeIICards = new ArrayList<ICard>(game.getListOfCards()
 					.stream()
-					.filter(inc -> inc.getUsedStartingFrom() <= tmpAllPlayers.size() && inc.getAge() == Age.AgeI)
+					.filter(inc -> inc.getUsedStartingFrom() <= tmpAllPlayers.size() && inc.getAge() == Age.AgeII)
 					.collect(Collectors.toList()));
 			
 			Random random = new Random();
