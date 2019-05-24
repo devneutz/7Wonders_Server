@@ -51,7 +51,7 @@ public class DbHelper {
 	}
 
 	/**
-	 * @author Joel Neutzner
+	 * @author Gabriel de Castilho
 	 * 
 	 * In dieser Methode wird geprüft ob das Passwort des übergebenen Spielers auch
 	 * mit dem Spielerpasswort welches in der DB abgelegt ist übereinstimmt.
