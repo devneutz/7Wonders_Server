@@ -12,7 +12,7 @@ import ch.fhnw.sevenwonders.interfaces.IPlayer;
 
 /**
  * 
- * @author Gabriel de Castilho, Joel Neutzner
+ * @author Gabriel de Castilho
  * 
  *         Diese Klasse erstellt die Tabelle Player in der mysql DB. In dieser
  *         Klasse werden zudem alle Überprüfungen welche gegen die
@@ -24,7 +24,7 @@ public class DbHelper {
 	private static final Logger logger = Logger.getLogger("");
 
 	/**
-	 * @author Joel Neutzner
+	 * @author Gabriel de Castilho
 	 * 
 	 * In dieser Methode wird die Datenbank initialisiert. Hierbei wird die Tabelle
 	 * "player" erstellt.

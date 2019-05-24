@@ -7,7 +7,10 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// Source: https://stackoverflow.com/questions/39067373/jdbc-and-multithreading
+/**
+ *  Source: https://stackoverflow.com/questions/39067373/jdbc-and-multithreading
+ *
+ */
 public class DbConnectionPool {
 	 private String connString = "jdbc:mysql://127.0.0.1:3306/five4sevenwonders?connectTimeout=5000&serverTimezone=UTC";
 	 private static DbConnectionPool _instance;
